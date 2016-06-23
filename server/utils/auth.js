@@ -11,6 +11,11 @@ const time = {
 
 auth = {
 
+  //Return timestamp based UUID
+  generateUUID: () => {
+    return uuid.v1();
+  }
+
 
 
   authenticateApiRequest: () => {
