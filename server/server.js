@@ -1,9 +1,9 @@
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var express = require('express');
-var db = require('./db');
-var host = process.env.HOST || '127.0.0.1';
-var port = process.env.PORT || '8080';
+var db = require('tandem-db');
+var host = process.env.TANDEM_SERVER_HOST || '127.0.0.1';
+var port = process.env.TANDEM_SERVER_PORT || '8080';
 
 var app = express();
 
@@ -27,3 +27,5 @@ app.listen(port, host, err => {
   }
   console.log('Listening on http(s)://' + host + ':' + port + '/...');
 });
+
+db.printGreeting();

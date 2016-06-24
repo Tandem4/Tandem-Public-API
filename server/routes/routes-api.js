@@ -20,9 +20,9 @@ var router = express.router();
 
 
 //API - Basic user endpoints (THROTTLED)
-router.get('/api/v1/trends/',  trends.getAll);
-router.get('/api/v1/trends/:trend_id/',  trends.getOne);
-router.get('/api/v1/trends/:trend_id/article_id/',  articles.get);
+router.get('/api/v1/trends/', trends.getAll);
+router.get('/api/v1/trends/:trend_id/', trends.getOne);
+router.get('/api/v1/trends/:trend_id/article_id/', articles.get);
 
 //Routes that can be accessed by authenticated AND authorised users only
 router.post('/api/v1/articles/:article_id/', articles.add);

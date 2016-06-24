@@ -22,7 +22,6 @@ auth = {
 
   },
 
-
   //Generates an API key for new users
   generateApiKey: (ipAddress) => {
     //Create timestamp based UUID
