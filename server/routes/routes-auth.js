@@ -9,7 +9,15 @@ module.exports = function(app) {
   // app.get('/signup', (req, res) => {
   //   // res
   // });
+  app.get('/login', (req, res) => {
+    res.render('login');
+  })
+
   app.get('/signup', (req, res) => {
+    res.render('signup');
+  })
+
+  app.post('/signup', (req, res) => {
     var linkUuid = uuid.v1();
     // var mailTo = req.query.to;
     var mailTo = 'lensvelt.brett@gmail.com' + linkUuid;

@@ -3,13 +3,10 @@ var uuid = require('node-uuid');
 var jwt = require('express-jwt');
 
 auth = {
-
   //Return timestamp based UUID
   generateUUID: () => {
     return uuid.v1();
   },
-
-
 
   authenticateApiRequest: () => {
 
@@ -17,17 +14,12 @@ auth = {
 
   //Generates an API key for new users
   generateApiKey: (password, salt) => {
-
     var apiKey = crypto.createHash('sha256')
         .update(password)
         .update(salt)
         .digest('hex');
-
-    console.log(apiKey);
     return apiKey;
-
   }
-
 }
 
 // //Private methods
