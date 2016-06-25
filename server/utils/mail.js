@@ -23,6 +23,7 @@ module.exports = {
 
   //Wrapper for sendMail method
   send: (mailOptions, callback) => {
+    console.log(smtpTransport);
     smtpTransport.sendMail(mailOptions,(error, response) => {
       if (error) {
         callback(error);

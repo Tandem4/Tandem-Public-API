@@ -1,39 +1,22 @@
+var db = require('tandem-db');
 var express = require('express');
 var router = express.router();
 
+//API - Basic user endpoints accessible by anyone (THROTTLED)
+router.get('/api/v1/trends/', db.trends.getAll);
+router.get('/api/v1/trends/:trend_id/', db.trends.getOne);
+router.get('/api/v1/trends/:trend_id/article_id/', db.articles.get);
 
-
-
-//Routes that can be accessed by anyone
-
-
-
-
-
-//Routes that can be accessed by authenticated users only
-
-
-
-
-
-//Routes that can be accessed by authenticated AND authorised users only
-
-
-//API - Basic user endpoints (THROTTLED)
-router.get('/api/v1/trends/', trends.getAll);
-router.get('/api/v1/trends/:trend_id/', trends.getOne);
-router.get('/api/v1/trends/:trend_id/article_id/', articles.get);
-
-//Routes that can be accessed by authenticated AND authorised users only
-router.post('/api/v1/articles/:article_id/', articles.add);
-
+//API - Routes that can be accessed by authenticated AND authorised users ONLY
+router.post('/api/v1/articles/:article_id/', db.articles.add);
+router.get('/api/v1/admin/:user_id/', db.user.showApiDetails);
+router.post('/api/v1/admin/:user_id/', db.articles.resetApiSecret);
 
 //AUTH - SignUp & login endpoints
-router.get('/signup/', UserController.addNewUser);
-router.get('/send/', UserController.addNewUser);
-router.get('/verify/', UserController.getTeamUser);
-router.get('/login/', UserController.getUsersTeam);
-router.get('/oauth/tokens/', UserController.getUsersTeam);
+router.post('/signup/', db.users.addNewUser);
+router.get('/send/', db.users.addNewUser);
+router.get('/verify/', db.users.getTeamUser);
+router.get('/login/', db.users.getUsersTeam);
+// router.get('/oauth/tokens/', db.users.getUsersTeam);
 
-
-  module.exports = router;
+module.exports = router;

@@ -1,10 +1,60 @@
-
+var db = require('tandem-db');
+var uuid = require('node-uuid');
+var auth = require('../utils/auth');
+var mail = require('../utils/mail');
 
 module.exports = function(app) {
   //AUTH - SignUp & login endpoints
-  app.get('/signup/', UserController.addNewUser);
-  app.get('/send/', UserController.addNewUser);
-  app.get('/verify/', UserController.getTeamUser);
-  app.get('/login/', UserController.getUsersTeam);
-  app.get('/oauth/tokens/', UserController.getUsersTeam);
+  
+  // app.get('/signup', (req, res) => {
+  //   // res
+  // });
+  app.get('/signup', (req, res) => {
+    var linkUuid = uuid.v1();
+    // var mailTo = req.query.to;
+    var mailTo = 'lensvelt.brett@gmail.com' + linkUuid;
+    var verifyLink = req.protocol + '://' + req.hostname + '/verify?id=' + linkUuid;
+    // var messageOptions = mail.createMessage(mailTo, verifyLink);
+    // mail.send(messageOptions, (error, response)=> {
+    //   if (error) {
+    //     console.log('ERROR sending mail: ', error);
+    //   } else {
+        var apiKey = auth.generateApiKey('bonzer', linkUuid); //bcrypt email, password, salt
+        var apiSecret = uuid.v4().split('-').join(''); //uuid                             
+        db.User.forge({
+          email_address: mailTo,
+          link_uuid: linkUuid,
+          verified: false,
+          api_key: apiKey,
+          api_secret: apiSecret
+        })
+        .save()
+        .then((model) => {
+          //TODO - send message & redirect?
+          res.redirect('/login');
+        })
+      // }
+    // })
+  });
+
+  app.get('/verify', (req, res) => {
+    //Select user from db based on uuid per verify link
+    new db.User({ 'link_uuid': req.query.id })
+      .fetch()
+      .then((model) => {
+        //If exists, set verified to true
+        if (model) {
+          model.set({ verified: 1 });
+          model.save();
+          res.redirect('/admin');
+        } else {
+          //TODO: 403 redirect?
+          res.status(403).send('403 Forbidden - Invalid User');
+        }
+      })
+  });
+
+
+  // app.get('/login/', UserController.getUsersTeam);
+  // app.get('/oauth/tokens/', UserController.getUsersTeam);
 }
