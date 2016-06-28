@@ -20,10 +20,11 @@ require('./middleware/appMiddleware')(app);
 // app.use('/api/v1', auth);
 app.use('/api/v1', api);
 
-//Set up wildcard default redirect for unhandled routes
-app.get('*', (req, res) => {
-  res.redirect('/api/v1/login');
-})
+// //Set up wildcard default redirect for unhandled routes
+// app.get('*', (req, res) => {
+//   console.log("THE WILDCARD REDIRECT HIT");
+//   res.redirect('/api/v1/login');
+// })
 
 //Global error handling
 app.use((err, req, res, next) => {

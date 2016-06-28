@@ -23,7 +23,7 @@ methods.get = (req, res, next) => {
   Article.forge()
     .fetchAll()
     .then((articles) => {
-      if (!article) {
+      if (!articles) {
         //Raise error - no data returned
         next(new Error('No articles found'));
       } else {
