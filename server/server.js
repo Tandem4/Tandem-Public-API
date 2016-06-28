@@ -14,10 +14,10 @@ app.set('views', __dirname + '/views');
 require('./middleware/appMiddleware')(app);
 
 // //All API endpoints subject to throttling
-app.all('/api/v1/*', [require('./middleware/throttle')]);
+// app.all('/api/v1/*', [require('./middleware/throttle')]);
 
 //Set up the auth & api routes
-app.use('/api/v1', auth);
+// app.use('/api/v1', auth);
 app.use('/api/v1', api);
 
 //Set up wildcard default redirect for unhandled routes

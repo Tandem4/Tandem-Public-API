@@ -2,10 +2,10 @@ var Trend = require('tandem-db').Trend;
 var methods = {};
 
 //Router param callback to decorate the request object with specified trend
-method.params = (req, res, next, id) => {
+methods.params = (req, res, next, id) => {
   Trend.forge({ id: id })
     .fetch()
-    .then((trend) {
+    .then((trend) => {
       //Trend not found; raise error
       if (!trend) {
         next(new Error("Trend not found"))
@@ -21,7 +21,7 @@ method.params = (req, res, next, id) => {
 }
 
 //Get all trends (need to specifiy a time 'where' constrain?)
-method.get = (req, res, next) => {
+methods.get = (req, res, next) => {
   Trend.forge()
     .fetchAll()
     .then((trends) => {
@@ -40,7 +40,7 @@ method.get = (req, res, next) => {
 }
 
 //
-method.getOne = (req, res, next) => {
+methods.getOne = (req, res, next) => {
   Trend.forge({ id: req.trend.id })
     .fetch()
     .then()

@@ -1,26 +1,27 @@
-var router = require('express').Router();
-var authController = require('./authController');
+// var router = require('express').Router();
+// var authController = require('./authController');
 
-/*********************************************
-* Routes relative to /api/v1/
-*********************************************/
+// /*********************************************
+// * Routes relative to /api/v1/
+// *********************************************/
 
-//
-router.param('uuid', authController.params);
+// //Render login page
+// router.get('/login', (req, res) => {
+//   res.render('login');
+// });
 
-//Login route
-router.route('/login')
-  .get(authController.goToLogin)
-  .post(authController.login);
+// //Verify is existing user & log them in - return signed JWT token
+// router.post('/login', verifyUser(), authController.login);
 
-//Signup route
-router.route('/signup')
-  .get(authController.goToSignUp)
-  .post(authController.signUp);
+// //Render new sign up page
+// router.get('/signup', (req, res) => {
+//   res.render('signup');
+// });
 
-//Email verification route
-router.route('/verify')
-  .post(authController.verify);
+// //Process initial signup details & send verification email
+// router.post('/signup', verifyUser(), authController.signIn);
 
+// //Update user info based on email verification & return signed JWT token
+// router.get('/verify', verifyUser(), authController.signIn);
 
-module.exports = router;
+// module.exports = router;

@@ -2,7 +2,7 @@ var Article = require('tandem-db').Article;
 
 var methods = {};
 
-methods.params((req, res, next, id) => {
+methods.params = (req, res, next, id) => {
   Article.forge({ id: id })
     .fetch()
     .then((article) => {
@@ -19,7 +19,7 @@ methods.params((req, res, next, id) => {
 };
 
 //GET method returning all articles
-methods.get((req, res, next) => {
+methods.get = (req, res, next) => {
   Article.forge()
     .fetchAll()
     .then((articles) => {
@@ -32,13 +32,13 @@ methods.get((req, res, next) => {
       }
     })
     //Catch unanticipated errors
-    .catch((err) {
+    .catch((err) => {
       next(err);
     })
-});
+};
 
 //POST method for manually adding an article to the database
-methods.post((req, res, next) => {
+methods.post = (req, res, next) => {
   Article.forge( req.article )
     .save()
     .then((article) => {
@@ -54,6 +54,6 @@ methods.post((req, res, next) => {
     .catch((err) => {
       next(err);
     })
-})
+};
 
 module.exports = methods;
