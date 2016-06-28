@@ -1,6 +1,10 @@
 var router = require('express').Router();
 var trendController = require('./trendController');
 
+/*********************************************
+* Routes relative to /api/v1/trends
+*********************************************/
+
 //
 router.param('id', trendController.params);
 

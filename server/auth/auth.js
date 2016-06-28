@@ -22,7 +22,7 @@ module.exports = {
 
   //Verify user on login
   verifyUser: () => {
-    return (req, res, next) {
+    return (req, res, next) => {
       var email = req.body.email;
       var password = req.body.password;
 

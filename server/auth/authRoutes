@@ -1,18 +1,26 @@
 var router = require('express').Router();
 var authController = require('./authController');
 
+/*********************************************
+* Routes relative to /api/v1/
+*********************************************/
+
 //
-router.param('id', authController.param);
+router.param('uuid', authController.params);
 
-//Collection routes
-router.route('./')
-  .get(authController.get)
-  .post(authController.post)
+//Login route
+router.route('/login')
+  .get(authController.goToLogin)
+  .post(authController.login);
 
-//Instance routes
-router.route('/:id')
-  .get(authController.getOne)
-  .put(authController.put)
-  .delete(authController.delete)
+//Signup route
+router.route('/signup')
+  .get(authController.goToSignUp)
+  .post(authController.signUp);
+
+//Email verification route
+router.route('/verify')
+  .post(authController.verify);
+
 
 module.exports = router;

@@ -1,6 +1,10 @@
 var router = require('express').Router();
 var storyController = require('./storyController');
 
+/*********************************************
+* Routes relative to /api/v1/articles
+*********************************************/
+
 router.param('id', storyController.params);
 
 router.route('/')

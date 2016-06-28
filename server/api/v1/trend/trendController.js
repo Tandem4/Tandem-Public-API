@@ -11,7 +11,7 @@ method.params = (req, res, next, id) => {
         next(new Error("Trend not found"))
       } else {
         //Decorate the request object
-        req.trend = trend;
+        req.trendId = trend.id;
       }
     })
     //Catch any unantacipated errors
@@ -23,14 +23,14 @@ method.params = (req, res, next, id) => {
 //Get all trends (need to specifiy a time 'where' constrain?)
 method.get = (req, res, next) => {
   Trend.forge()
-    .fetch()
+    .fetchAll()
     .then((trends) => {
       //No trends found
       if (!trends) {
         next(new Error("No data"))
       } else {
         //Send the trends JSON object
-        res.json(trends);
+        res.status(200).json(trends);
       }
     })
     //Catch unexpected errors

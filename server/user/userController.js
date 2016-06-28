@@ -12,7 +12,7 @@ methods.params = (req, res, next, id) => {
         next(new Error('Failed to load user'));
       } else {
         //decorate request with user object & call next function
-        req.user = user;
+        req.user = user.id;
         next();
       }
     })
@@ -22,7 +22,7 @@ methods.params = (req, res, next, id) => {
 };
 
 //Get the current user
-methods.getOne = (req, res, next) => {
+methods.getOneById = (req, res, next) => {
   User.forge({ id: req.user.id })
     .fetch()
     .then((user) => {
@@ -46,7 +46,7 @@ methods.post = (req, res, next) => {
       if (!user) {
         next(new Error('Failed to create user'));
       } else {
-        res.json(user);
+        res.status(201).json(user);
       }
     })
     .catch((err) => {

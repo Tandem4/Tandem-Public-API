@@ -4,11 +4,7 @@ var auth = require('../utils/auth');
 var mail = require('../utils/mail');
 
 module.exports = function(app) {
-  //AUTH - SignUp & login endpoints
-  
-  // app.get('/signup', (req, res) => {
-  //   // res
-  // });
+
   app.get('/login', (req, res) => {
     res.render('login');
   })
@@ -61,7 +57,4 @@ module.exports = function(app) {
       })
   });
 
-
-  // app.get('/login/', UserController.getUsersTeam);
-  // app.get('/oauth/tokens/', UserController.getUsersTeam);
 }
