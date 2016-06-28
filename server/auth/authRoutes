@@ -1,0 +1,18 @@
+var router = require('express').Router();
+var authController = require('./authController');
+
+//
+router.param('id', authController.param);
+
+//Collection routes
+router.route('./')
+  .get(authController.get)
+  .post(authController.post)
+
+//Instance routes
+router.route('/:id')
+  .get(authController.getOne)
+  .put(authController.put)
+  .delete(authController.delete)
+
+module.exports = router;

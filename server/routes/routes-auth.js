@@ -1,4 +1,4 @@
-var db = require('tandem-db');
+var db = require('tandem-db').User;
 var uuid = require('node-uuid');
 var auth = require('../utils/auth');
 var mail = require('../utils/mail');

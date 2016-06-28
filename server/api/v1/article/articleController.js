@@ -1,0 +1,1 @@
+var Article = require('tandem-db').Story;
