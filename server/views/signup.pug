@@ -6,12 +6,12 @@ block content
   div.signup-container
     h1.title Tandem API Gateway
     div.signup-form
-      form(method='POST', action='/api/users')
+      form(method='POST', action='/signup')
         div.signup-form-input.email
           input(type='email', name='email', placeholder="Email" required)
         div.signup-form-input.password
           input(type='password', name='password', placeholder="Password" required)
-        button.signup-button Sign up
+        button.signup-button Sign Up
 
     div.login-link-container
       a.login-link(href='/login') Cancel

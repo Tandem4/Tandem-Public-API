@@ -10,11 +10,14 @@ var port = process.env.TANDEM_SERVER_PORT || '8080';
 app.engine('pug', pug);
 app.set('view engine', 'pug');
 app.set('views', __dirname + '/views');
-app.use(express.static('public'));
+// app.use(express.static('public'));
 
-//Set up application middleware
+//Logging middleware
 app.use(morgan('dev'));
-app.use(bodyParser.json()); // for parsing application/json
+//Parse application/json
+app.use(bodyParser.json());
+//Parse URL-encoded bodies
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // //All API endpoints subject to throttling
 // app.all('/api/v1/*', [require('./middleware/throttle')]);
@@ -22,9 +25,8 @@ app.use(bodyParser.json()); // for parsing application/json
 var routesAuth = require('./routes/routes-auth')(app);
 var routesApi = require('./routes/routes-api')(app);
 
-
 app.get('/', (req, res) => {
-  res.send("This is the crawler server");
+  res.redirect('/login');
 })
 
 app.listen(port, host, err => {

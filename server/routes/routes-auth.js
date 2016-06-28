@@ -20,14 +20,14 @@ module.exports = function(app) {
   app.post('/signup', (req, res) => {
     var linkUuid = uuid.v1();
     // var mailTo = req.query.to;
-    var mailTo = 'lensvelt.brett@gmail.com' + linkUuid;
-    var verifyLink = req.protocol + '://' + req.hostname + '/verify?id=' + linkUuid;
+    var mailTo = req.body.email;
+    var verifyLink = req.protocol + '://' + req.headers.host + '/verify?id=' + linkUuid;
     // var messageOptions = mail.createMessage(mailTo, verifyLink);
     // mail.send(messageOptions, (error, response)=> {
     //   if (error) {
     //     console.log('ERROR sending mail: ', error);
     //   } else {
-        var apiKey = auth.generateApiKey('bonzer', linkUuid); //bcrypt email, password, salt
+        var apiKey = auth.generateApiKey(req.body.password, linkUuid); //bcrypt email, password, salt
         var apiSecret = uuid.v4().split('-').join(''); //uuid                             
         db.User.forge({
           email_address: mailTo,
@@ -38,8 +38,7 @@ module.exports = function(app) {
         })
         .save()
         .then((model) => {
-          //TODO - send message & redirect?
-          res.redirect('/login');
+          res.send('<div>Please verify your email address by clicking the link in the email sent to you & then logging in <a href="/login">here</a></div>');
         })
       // }
     // })
@@ -50,7 +49,7 @@ module.exports = function(app) {
     new db.User({ 'link_uuid': req.query.id })
       .fetch()
       .then((model) => {
-        //If exists, set verified to true
+        //If exists, set verified to true, save & redirect to admin console
         if (model) {
           model.set({ verified: 1 });
           model.save();

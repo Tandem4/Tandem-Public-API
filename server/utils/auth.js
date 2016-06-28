@@ -1,6 +1,8 @@
+var jwt = require('jsonwebtoken');
 var crypto = require('crypto');
 var uuid = require('node-uuid');
-var jwt = require('express-jwt');
+var expressJwt = require('express-jwt');
+var checkToken = expressJwt({ secret: config.secrets.jwt } ); //checkToken middleware
 
 auth = {
   //Return timestamp based UUID
@@ -19,6 +21,23 @@ auth = {
         .update(salt)
         .digest('hex');
     return apiKey;
+  },
+
+  checkJwt: (req, res, next) => {
+    //Assume client sending token one of 3 ways - POST Body, GET param or in Header
+    var token = (req.body && req.body.access_token) || (req.query && req.query.access_token) || req.headers['x-access-token'];
+    
+  },
+
+  decodeToken: () => {
+    return (req, res, next) => {
+      //if toke placed in query string, place on the headers so checkToken function can check it.
+      if (req.query && req.query.hasOwnProperty('access_token')) {
+        req.headers.authorization = 'Bearer ' + req.query.access_token;
+      }
+
+      checkToken(req, res, next);
+    }
   }
 }
 
@@ -27,7 +46,7 @@ auth = {
 // //Generate the JWT token for the session
 // genToken = (apiKeySecret) => {
 //   var expires = expiresIn(1); //1 days
-//   var token = jwt.encode({
+//   var token = expressJwt.encode({
 //     exp: expires
 //   }, require('../config/secret')());
 
