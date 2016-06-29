@@ -12,6 +12,7 @@ methods.params = (req, res, next, id) => {
       } else {
         //Decorate the request object
         req.trendId = trend.id;
+        next();
       }
     })
     //Catch any unantacipated errors
@@ -27,6 +28,7 @@ methods.get = (req, res, next) => {
     .then((trends) => {
       //No trends found
       if (!trends) {
+        res.status(404);
         next(new Error("No data"))
       } else {
         //Send the trends JSON object
@@ -41,9 +43,22 @@ methods.get = (req, res, next) => {
 
 //
 methods.getOne = (req, res, next) => {
-  Trend.forge({ id: req.trend.id })
+  Trend.forge({ id: req.trendId })
     .fetch()
-    .then()
+    .then((trend) => {
+      if (!trend) {
+        //No such trend found
+        res.status(404);
+        next(new Error("Trend not found"));
+      } else {
+        //Send the trend JSON object
+        res.status(200).json(trend);
+      }
+    })
+    //Catch unexpected errors
+    .catch((err) => {
+      next(err);
+    })
 
 }
 
