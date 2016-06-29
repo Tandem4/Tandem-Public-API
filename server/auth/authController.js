@@ -21,7 +21,14 @@ methods.goToSignup = (req, res, next) => {
 
 //After adding new user to db, prompt them to validate email address
 methods.signUp = (req, res, next) => {
-  res.send('<div>Please verify your email address by clicking the link in the email sent to you & then logging in <a href="/auth/login">here</a></div>'); 
+  res.send('<div>Please verify your email address by clicking the link in the email sent to you & then logging in <a href="/auth/login">here</a></div>');
+}
+
+//After adding new user to db, prompt them to validate email address
+methods.verify = (req, res, next) => {
+  var token = signToken(req.user.id);
+  res.json({ token: token });
+  res.render('article');
 }
 
 module.exports = methods;

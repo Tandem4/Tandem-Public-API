@@ -1,0 +1,21 @@
+extends ./base
+
+block styles
+
+block content
+  div.article-container
+    h1.title Tandem API Gateway - Add Article
+    div.article-form
+      form(method='POST', action='/api/v1/articles')
+        div.article-form-input.title
+          input(type='text', name='title', placeholder="Title" required)
+        div.article-form-input.link
+          input(type='url', name='link', placeholder="Link" required)
+        div.article-form-input.image
+          input(type='url', name='image', placeholder="Image link" required)
+        div.article-form-input.summary
+          input(type='text', name='summary', placeholder="Summary" required)
+        div.article-form-input.date
+          input(type='date', name='date', placeholder="Date" required)
+
+        button.login-button Submit

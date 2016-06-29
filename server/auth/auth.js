@@ -134,8 +134,8 @@ module.exports = {
   //Sign the token
   signToken: (id) => {
     return jwt.sign(
-      {id: userid},
+      {id: id},
       config.secrets.jwt,
-      {expiresInMinutes: config.expireTime})
+      {expiresIn: config.expireTime})
   }
 };

@@ -3,7 +3,7 @@ var config = {
   test: 'testing',
   prod: 'production',
   port: process.env.PORT || 3000,
-  expireTime: 24 * 60,
+  expireTime: 24 * 60 * 10,
   secrets: {
     jwt: process.env.JWT || 'myDefaultSecret'
   }

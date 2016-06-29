@@ -25,6 +25,6 @@ router.get('/signup', (req, res) => {
 router.post('/signup', addNewUser(), authController.signUp);
 
 //Update user info based on email verification & return signed JWT token
-router.get('/verify', validateMail(), authController.login);
+router.get('/verify', validateMail(), authController.verify);
 
 module.exports = router;
