@@ -1,27 +1,30 @@
-// var router = require('express').Router();
-// var authController = require('./authController');
+var router = require('express').Router();
+var authController = require('./authController');
+var verifyExistingUser = require('./auth').verifyExistingUser;
+var addNewUser = require('./auth').addNewUser;
+var validateMail = require('./auth').validateMail;
 
-// /*********************************************
-// * Routes relative to /api/v1/
-// *********************************************/
+/*********************************************
+* Routes relative to /auth
+*********************************************/
 
-// //Render login page
-// router.get('/login', (req, res) => {
-//   res.render('login');
-// });
+//Render login page
+router.get('/login', (req, res) => {
+  res.render('login');
+});
 
-// //Verify is existing user & log them in - return signed JWT token
-// router.post('/login', verifyUser(), authController.login);
+//Verify is existing user & log them in - return signed JWT token
+router.post('/login', verifyExistingUser(), authController.login);
 
-// //Render new sign up page
-// router.get('/signup', (req, res) => {
-//   res.render('signup');
-// });
+//Render new sign up page
+router.get('/signup', (req, res) => {
+  res.render('signup');
+});
 
-// //Process initial signup details & send verification email
-// router.post('/signup', verifyUser(), authController.signIn);
+//Process initial signup details & send verification email
+router.post('/signup', addNewUser(), authController.signUp);
 
-// //Update user info based on email verification & return signed JWT token
-// router.get('/verify', verifyUser(), authController.signIn);
+//Update user info based on email verification & return signed JWT token
+router.get('/verify', validateMail(), authController.login);
 
-// module.exports = router;
+module.exports = router;

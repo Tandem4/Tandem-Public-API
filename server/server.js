@@ -1,7 +1,7 @@
 var express = require('express');
 var app = express();
 var pug = require('pug').__express;
-var auth = require('./auth/auth');
+var auth = require('./auth/authRoutes');
 var api = require('./api/v1/api');
 
 //Configure server side rendering templates & view engine
@@ -17,8 +17,8 @@ require('./middleware/appMiddleware')(app);
 // app.all('/api/v1/*', [require('./middleware/throttle')]);
 
 //Set up the auth & api routes
-// app.use('/api/v1', auth);
 app.use('/api/v1', api);
+app.use('/auth', auth);
 
 // //Set up wildcard default redirect for unhandled routes
 // app.get('*', (req, res) => {

@@ -6,7 +6,7 @@ block content
   div.login-container
     h1.title Tandem API Gateway
     div.login-form
-      form(method='POST', action='/login')
+      form(method='POST', action='/auth/login')
         div.login-form-input.username
           input(type='email', name='email', placeholder="Email" required)
         div.login-form-input.password
@@ -14,4 +14,4 @@ block content
         button.login-button Log in
 
     div.signup-link-container
-      a.signup-link(href='/signup') Sign up for access 
+      a.signup-link(href='/auth/signup') Sign up for access 

@@ -35,12 +35,12 @@
 //     })
 //     .catch((err) => {
 //       next(err);
-//     }
+//     });
 // };
 
-// //Add the new user
+// //Add a new user
 // methods.post = (req, res, next) => {
-//   User.forge({ req.user}) //best way to do this??
+//   User.forge({ req.user }) //best way to do this??
 //     .save()
 //     .then((user) => {
 //       if (!user) {
@@ -54,7 +54,7 @@
 //     })
 // };
 
-// //Update user to verified post email verification
+//Update user to verified post email verification
 // methods.put = (req, res, next) => {
 //   User.forge( {'link_uuid': req.user.uuid })
 //     .fetch()

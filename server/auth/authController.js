@@ -1,50 +1,28 @@
-// var userController = require('./user/userController');
-// var verifyUser = require('./auth').verifyUser;
-// var signToken = require('./auth').signToken;
+var userController = require('../user/userController');
+var signToken = require('./auth').signToken;
 
+var methods = {};
 
+//Render the static login page
+methods.goToLogin = (req, res, next) => {
+  res.render('login');
+}
 
-// module.exports = (req, res, next) => {
-//   var token = signToken(req.user.id);
-//   res.json({ token: token });
-// }
+//Sign and send token response for valid users
+methods.login = (req, res, next) => {
+  var token = signToken(req.user.id);
+  res.json({ token: token });
+}
 
-// var methods = {};
+//Render the static signup page for new users
+methods.goToSignup = (req, res, next) => {
+  res.render('signup');
+}
 
-// methods.params = (req, res, next) => {
-  
-// }
+//After adding new user to db, prompt them to validate email address
+methods.signUp = (req, res, next) => {
+  res.send('<div>Please verify your email address by clicking the link in the email sent to you & then logging in <a href="/auth/login">here</a></div>'); 
+}
 
-// methods.goToLogin = (req, res, next) => {
-//   res.render('login');
-// }
-
-// methods.login = (req, res, next) => {
-  
-// }
-
-// methods.goToSignup = (req, res, next) => {
-//   res.render('signup');
-// }
-
-// methods.signUp = (req, res, next) => {
-//     var linkUuid = uuid.v1();
-//     // var mailTo = req.query.to;
-//     var mailTo = req.body.email;
-//     var verifyLink = req.protocol + '://' + req.headers.host + '/verify?id=' + linkUuid;
-//     // var messageOptions = mail.createMessage(mailTo, verifyLink);
-//     // mail.send(messageOptions, (error, response)=> {
-//     //   if (error) {
-//     //     console.log('ERROR sending mail: ', error);
-//     //   } else {
-//         var apiKey = auth.generateApiKey(req.body.password, linkUuid); //bcrypt email, password, salt
-//         var apiSecret = uuid.v4().split('-').join(''); //uuid    
-  
-// }
-
-// methods.verify = (req, res, next) => {
-  
-// }
-
-// module.exports = methods;
+module.exports = methods;
 
