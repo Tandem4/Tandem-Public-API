@@ -42,7 +42,7 @@ methods.get = (req, res, next) => {
     })
 }
 
-//Get a single trend
+//Get a single trend TODO: update to filter for a specific trend id & re-consider route architecture/modularity
 methods.getOne = (req, res, next) => {
   // Article.forge({ trend_id: req.trendId })
   Article.forge()
