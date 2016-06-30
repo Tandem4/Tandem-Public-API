@@ -1,4 +1,5 @@
 var Trend = require('tandem-db').Trend;
+var Article = require('tandem-db').Article;
 var methods = {};
 
 //Router param callback to decorate the request object with specified trend
@@ -41,18 +42,19 @@ methods.get = (req, res, next) => {
     })
 }
 
-//
+//Get a single trend
 methods.getOne = (req, res, next) => {
-  Trend.forge({ id: req.trendId })
-    .fetch()
-    .then((trend) => {
-      if (!trend) {
-        //No such trend found
+  // Article.forge({ trend_id: req.trendId })
+  Article.forge()
+    .fetchAll()
+    .then((articles) => {
+      if (!articles) {
+        //No such articles found
         res.status(404);
         next(new Error("Trend not found"));
       } else {
         //Send the trend JSON object
-        res.status(200).json(trend);
+        res.status(200).json(articles);
       }
     })
     //Catch unexpected errors

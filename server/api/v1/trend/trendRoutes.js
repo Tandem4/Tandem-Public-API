@@ -5,7 +5,7 @@ var trendController = require('./trendController');
 * Routes relative to /api/v1/trends
 *********************************************/
 
-//
+//local route param callback to set route specific params on request object for easy access
 router.param('id', trendController.params);
 
 //Collection routes - all trends
