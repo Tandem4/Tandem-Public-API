@@ -4,30 +4,30 @@ var expect = require('chai').expect;
 var supertest = require('supertest');
 var server = require('../index.js');
 var request = supertest.agent(server);
-var requestHandler = require('../server-helpers/requestHandler.js')
+var trendController = require('../server/api/v1/trend/trendController');
 
-describe('fetchDefaultDash', function() {
+describe('get all trends', function() {
   it('should be a function', function() {
-    expect(requestHandler.fetchDefaultDash).to.be.a('function');
+    expect(trendController.get).to.be.a('function');
   });
 });
 
-describe('fetchStory', function() {
+describe('get articles', function() {
   it('should be a function', function() {
-    expect(requestHandler.fetchStory).to.be.a('function');
+    expect(trendController.getOne).to.be.a('function');
   });
 });
 
 // supertest
-describe('server', function() {
+// describe('server', function() {
 
-  describe('GET /', function () {
-    it('should return Hello world from Tandem!', function (done) {
-      request
-        .get('/')
-        .expect(200, 'Hello world from Tandem!', done);
-    });
-  });
+//   describe('GET /', function () {
+//     it('should return Hello world from Tandem!', function (done) {
+//       request
+//         .get('/')
+//         .expect(200, 'Hello world from Tandem!', done);
+//     });
+//   });
 
   // describe('GET /api/v1/dashboard', function () {
   //   it('should return the mocked trend data', function (done) {
@@ -45,7 +45,7 @@ describe('server', function() {
   //   });
   // });
 
-});
+// });
 
 // describe('should break Travis', function() {
 //   it('should return false', function() {
