@@ -1,9 +1,17 @@
+/********************************************************************
+ * TO BE REVISTED POST MVP - REDIS RATE LIMITING USING SORTED SETS
+ *******************************************************************/
+
 var redis = require('redis');
 
 //use default host & port for now
 var client = redis.createClient();
-const REQUEST_LIMIT_PER_SEC = 1;
-const REQUEST_LIMIT_PER_MIN = 20;
+const mapSeconds = {
+  seconds: 1,
+  minutes: 60,
+  hours: 60 * 60,
+  days: 60 * 60 * 24
+};
 
 //Handle errors
 client.on('error', (err) => {
@@ -15,7 +23,38 @@ client.on('ready', () => {
 })
 
 //Rate Limiting middleware function for api
-var rateLimiter = () => {
+var rateLimiter = (rateLimits) => {
+  //rateLimits is an array containing either:
+  //- tuples of the form [requests, seconds]
+  //- objects of the form {requests: x, timeLimit: y} where timelimit is one of: seconds, minutes, hours, days
+
+    //Deal with the case where rateLimits is a single constraint but has not been nested in a tuple
+    if (rateLimits.length === 2 && typeof rateLimits[0] === 'number') {
+      rateLimits = [rateLimits];
+    };
+
+    //Return array of all limits converted to tuple form [requests, seconds]
+    var tupledLimits = rateLimits.map((limit) => {
+      //If is an array, already in tuple form
+      if (Array.isArray(limit)) {
+        return limit;
+      } else if (limit && typeof limit === 'object') {
+        //If limit is in object form, get the key representing the time dimension
+        Object.keys(limit).forEach((key) => {
+          if (!key === 'requests') {
+            //Restate contraint in tuple form, calculted in seconds equivalent
+            var tupledLimit = [limit.requests, mapSeconds[key] * limit[key]];
+          }
+        });
+        //Return the new tuple
+        return tupledLimit;
+      }
+    });
+
+    //Sort the limits in ascending order by number of seconds
+    var sortedLimits = tupledLimits.sort((a, b) => {
+      return (a[1] > b[1] ? 1 : 0);
+    })
 
   //Return the throttling middleware function, retaining access via closure to the sorted rate limits
   //Leaky bucket implementation
@@ -23,17 +62,17 @@ var rateLimiter = () => {
     const nameSpace = 'apireq:';
     //Limit API calls per user (vs per user per endpoint) - use user id if authenticated, else best guess ip address (anonymous user)
     var userKey = nameSpace + (req.user.id || req.ip || req.ips);
-    client.get(userKey, (error, replies) => {
-      if (error) {
-        console.log(error);
-        next(err);
-      } else if (!replies) {
-        //No previous requests; no need to throttle - process API request
-        next();
-      } else {
-        if (replies.length)
-      }
-    });
+
+    //No rate limits in place
+    if (!sortedLimits.length) {
+      next();
+    } else {
+      var timeStamp = Date.now();
+      //Thottle
+      // sortedLimits.forEach((limit) => {
+        client.multi()
+          .zadd(userKey, timeStamp, JSON.stringify(timeStamp));
+          .
 
         //For each request added to Redis List (linked list), set TTL = maximum time constraint, value = current time stamp
         //[front of list = oldest, back of list = newest]
@@ -41,23 +80,17 @@ var rateLimiter = () => {
         //
 
 
-        // FUNCTION LIMIT_API_CALL(ip)
-        // ts = CURRENT_UNIX_TIME()
-        // keyname = ip+":"+ts
-        // current = GET(keyname)
-        // IF current != NULL AND current > 10 THEN
-        //     ERROR "too many requests per second"
-        // ELSE
-        //     MULTI
-        //         INCR(keyname,1)
-        //         EXPIRE(keyname,10)
-        //     EXEC
-        //     PERFORM_API_CALL()
-        // END
-
       // });      
+      
+
+    }
+    console.log('hello');
+
   }
-};
+}
+
+
+rateLimiter([1,10]);
 
 
 
