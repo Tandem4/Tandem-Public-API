@@ -27,6 +27,7 @@ methods.signUp = (req, res, next) => {
 }
 
 //After adding new user to db, prompt them to validate email address
+//TODO - there need to be two ways of accessing this endpoint (i.e. two endpoints - one for web client, one for straight API call)
 methods.verify = (req, res, next) => {
   var token = signToken(req.user.id);
   //Send the JWT token back in a custom response header
