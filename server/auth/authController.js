@@ -1,4 +1,3 @@
-var userController = require('../user/userController');
 var signToken = require('./auth').signToken;
 
 var methods = {};
@@ -11,7 +10,10 @@ methods.goToLogin = (req, res, next) => {
 //Sign and send token response for valid users
 methods.login = (req, res, next) => {
   var token = signToken(req.user.id);
-  res.json({ token: token });
+  //Send the JWT token back in a custom response header
+  res.set('X-Access-Token', token);
+  //Render the article page for manually submitting an article
+  res.render('article');
 }
 
 //Render the static signup page for new users
@@ -27,7 +29,9 @@ methods.signUp = (req, res, next) => {
 //After adding new user to db, prompt them to validate email address
 methods.verify = (req, res, next) => {
   var token = signToken(req.user.id);
-  res.json({ token: token });
+  //Send the JWT token back in a custom response header
+  res.set('X-Access-Token', token);
+  //Render the article page for manually submitting an article
   res.render('article');
 }
 

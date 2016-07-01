@@ -4,7 +4,6 @@ var config = require('../config/config');
 var checkToken = expressJwt({ secret: config.secrets.jwt } ); //returns middleware function that checks req.headers.authorization to determine whether token valid or not
 var uuid = require('node-uuid');
 var User = require('tandem-db').User;
-var userController = require('../user/userController');
 var Promise = require('bluebird');
 
 module.exports = {
