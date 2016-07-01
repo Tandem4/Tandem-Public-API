@@ -65,7 +65,7 @@ var rateLimiter = () => {
           //Within limit, process the request
           } else {
             //Set Rate Limit custom headers
-            res.set(setRateLimitHeaders(REQUEST_LIMIT_PER_MIN, REQUEST_LIMIT_PER_MIN - replies[0]));
+            res.set(setRateLimitHeaders(REQUEST_LIMIT_PER_MIN, REQUEST_LIMIT_PER_MIN - replies));
             next();
           }
         })
