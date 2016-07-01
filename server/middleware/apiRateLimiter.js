@@ -14,7 +14,7 @@ client.on('ready', () => {
 })
 
 //Helper function for creating Rate Limit custom headers object
-var setRateLimitHeaders = (limit, remaining, rest) => {
+var setRateLimitHeaders = (limit, remaining) => {
   return {
     'X-Rate-Limit-Limit': limit,          //The number of allowed requests in the current period
     'X-Rate-Limit-Remaining': remaining  //The number of remaining requests in the current period
@@ -25,12 +25,13 @@ var setRateLimitHeaders = (limit, remaining, rest) => {
 //Rate Limiting middleware function for api - use limited by user only (vs by user + endpoint)
 var rateLimiter = () => {
   return (req, res, next) => {
-    //Redis namespace for throttling datastructures Redis LIST)
+    //Redis namespace for rate limiting datastructures - Redis LIST)
     const nameSpace = 'apireq:';
     //Get user id if authenticated, else try and id anonymous users by ip address (best guess)
-    var id = (req.user && req.user.id) ? req.user.id : req.ip || req.ips;
+    var id = (req.user && req.user.id) ? req.user.id : req.ip;
     //Redis userKey for LIST datastructure
     var userKey = nameSpace + id;
+    //Get List length for current userKey
     client.llen(userKey, (error, replies) => {
       //Handle errors
       if (error) {
@@ -41,10 +42,11 @@ var rateLimiter = () => {
         //Batch execute atomic commands
         client.multi()
           .rpush(userKey, 1)
-          .expire(userKey, 60) //Set TTL to 60 seconds
+          .expire(userKey, 60) //Set userKey Time To Live (TTL) to 60 seconds
           .exec((error, replies) => {
             //Set Rate Limit custom headers
             res.set(setRateLimitHeaders(REQUEST_LIMIT_PER_MIN, REQUEST_LIMIT_PER_MIN - replies[0]));
+            //Process the API request
             next();
           });
       } else {
@@ -60,6 +62,7 @@ var rateLimiter = () => {
           } else {
             //Set Rate Limit custom headers
             res.set(setRateLimitHeaders(REQUEST_LIMIT_PER_MIN, REQUEST_LIMIT_PER_MIN - replies));
+            //Process the API request
             next();
           }
         })
