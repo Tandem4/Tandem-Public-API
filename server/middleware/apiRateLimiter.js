@@ -1,8 +1,12 @@
 var redis = require('redis');
+var host = process.env.TANDEM_DO_REDIS_HOST || '127.0.0.1';
+var port = process.env.TANDEM_DO_REDIS_PORT || '6379';
+var password = process.env.TANDEM_DO_REDIS_PW || '';
+const REQUEST_LIMIT_PER_MIN = 20;
 
 //use default host & port for now
-var client = redis.createClient();
-const REQUEST_LIMIT_PER_MIN = 20;
+var client = redis.createClient(port, host);
+client.auth(password);
 
 //Handle errors
 client.on('error', (err) => {
