@@ -14,102 +14,76 @@ client.on('ready', () => {
   console.log('Connected to Redis client...');
 })
 
+//Helper function for creating Rate Limit custom headers object
+var setRateLimitHeaders = (limit, remaining, rest) => {
+  return {
+    'X-Rate-Limit-Limit': limit,          //The number of allowed requests in the current period
+    'X-Rate-Limit-Remaining': remaining,  //The number of remaining requests in the current period
+    'X-Rate-Limit-Reset': rest            //The number of seconds left in the current period
+  };
+};
+
 //Rate Limiting middleware function for api
 var rateLimiter = () => {
 
-  //Return the throttling middleware function, retaining access via closure to the sorted rate limits
-  //Leaky bucket implementation
   return (req, res, next) => {
     const nameSpace = 'apireq:';
+    var limit;
+    var remaining;
+    var rest;
     //Limit API calls per user (vs per user per endpoint) - use user id if authenticated, else best guess ip address (anonymous user)
     var userKey = nameSpace + (req.user.id || req.ip || req.ips);
-    client.get(userKey, (error, replies) => {
+    client.llen(userKey, (error, replies) => {
+      //Handle errors
       if (error) {
         console.log(error);
-        next(err);
+        next(err);        
+      //No previous requests; generate List & process API request
       } else if (!replies) {
-        //No previous requests; no need to throttle - process API request
+        //Batch execute atomic commands
+        client.multi()
+          .rpush(userKey, new Date.now())
+          .expire(userKey, 60) //Set TTL to 60 seconds
+          .exec();
+        //Set Rate Limit custom headers
+        res.set(setRateLimitHeaders(limit, remaining, rest));
         next();
+      //Limit exceeded
+      } else if (replies[0] > REQUEST_LIMIT_PER_MIN) {
+        //Set Rate Limit custom headers
+        res.set(setRateLimitHeaders(limit, remaining, rest));
+        //Set HTTP status code
+        res.status(429).send("Too Many Requests");
       } else {
-        if (replies.length)
+        client.rpushx(userKey, (error, replies) => {
+          //Set Rate Limit custom headers
+          res.set(setRateLimitHeaders(limit, remaining, rest));
+          next();
+        })
       }
     });
 
-        //For each request added to Redis List (linked list), set TTL = maximum time constraint, value = current time stamp
-        //[front of list = oldest, back of list = newest]
-        //No of elements = total no of requests for the specified TTL interval
-        //
 
+    // X-Rate-Limit-Limit - The number of allowed requests in the current period
+    // X-Rate-Limit-Remaining - The number of remaining requests in the current period
+    // X-Rate-Limit-Reset - The number of seconds left in the current period
 
         // FUNCTION LIMIT_API_CALL(ip)
-        // ts = CURRENT_UNIX_TIME()
-        // keyname = ip+":"+ts
-        // current = GET(keyname)
-        // IF current != NULL AND current > 10 THEN
+        // current = LLEN(ip)
+        // IF current > 10 THEN
         //     ERROR "too many requests per second"
         // ELSE
-        //     MULTI
-        //         INCR(keyname,1)
-        //         EXPIRE(keyname,10)
-        //     EXEC
+        //     IF EXISTS(ip) == FALSE
+        //         MULTI
+        //             RPUSH(ip,ip)
+        //             EXPIRE(ip,1)
+        //         EXEC
+        //     ELSE
+        //         RPUSHX(ip,ip)
+        //     END
         //     PERFORM_API_CALL()
         // END
 
       // });      
   }
 };
-
-
-
-
-//PSEUDOCODE - EXPRESS MIDDLEWARE THROTTLE FUNCTION:
-//for each user
-  //for each new api request
-    //check the elapsed since most recent request
-    //iterate over the established rate constraints per smallest unit of time to largest
-      //if still inside current time constraint, block the request & respond with 429 status, updating headers
-      //else check time elapsed since next most recent request
-        //if still inside next largest time constraint, block the request & respond with 429 status, updating headers
-        //else
-          //set the TTL time to live equal to the time period for the current constraint
-          //increment Redis timestamped request count by one accordingly
-          //process the api request
-//
-//
-//Redis Data Structure:
-//A list of requests per each user
-//key for each user:
-  //loggedInUser? -> namespace + user_id per decoded token + route
-  //anonymousUser? -> namespace + ip + route
-//value = timestamp
-//list (array) length - dictated by rate constraint for largest user of time, expressed in seconds
-
-
-// //Redis example
-// var client = redis.createClient(), set_size = 20;
- 
-// client.sadd("bigset", "a member");
-// client.sadd("bigset", "another member");
- 
-// while (set_size > 0) {
-//     client.sadd("bigset", "member " + set_size);
-//     set_size -= 1;
-// }
- 
-// // multi chain with an individual callback 
-// client.multi()
-//     .scard("bigset")
-//     .smembers("bigset")
-//     .keys("*", function (err, replies) {
-//         // NOTE: code in this callback is NOT atomic 
-//         // this only happens after the the .exec call finishes. 
-//         client.mget(replies, redis.print);
-//     })
-//     .dbsize()
-//     .exec(function (err, replies) {
-//       console.log(replies);
-//         console.log("MULTI got " + replies.length + " replies");
-//         replies.forEach(function (reply, index) {
-//             console.log("Reply " + index + ": " + reply.toString());
-//         });
-//     });
