@@ -56,7 +56,7 @@ methods.getOne = (req, res, next) => {
         next(new Error('No articles found'));
       } else {
         //Send the JSON articles object
-        res.json(article);
+        res.redirect('/articles');
       }
     })
     //Catch unanticipated errors
@@ -65,9 +65,12 @@ methods.getOne = (req, res, next) => {
     })
 };
 
+//TODO: REFACTOR INTO SEPARATE ROUTE ENDPOINT WITH SEPARATE CONTROLLER - DOESNT BELONG HERE
 //POST method for manually adding an article to the database
 methods.post = (req, res, next) => {
+  //Get the upload object from req.body & add a unique upload key
   var rawArticle = Object.assign({}, req.body, { upload_id: uuid.v1().split('-').join('') });
+  //Insert the article into MongoDb
   RawArticle(rawArticle);
   res.json(rawArticle)
   next();
