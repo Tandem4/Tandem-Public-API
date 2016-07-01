@@ -1,4 +1,3 @@
-var userController = require('../user/userController');
 var signToken = require('./auth').signToken;
 
 var methods = {};
