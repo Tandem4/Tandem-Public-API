@@ -2,7 +2,6 @@ var redis = require('redis');
 
 //use default host & port for now
 var client = redis.createClient();
-const REQUEST_LIMIT_PER_SEC = 1;
 const REQUEST_LIMIT_PER_MIN = 20;
 
 //Handle errors
@@ -18,22 +17,25 @@ client.on('ready', () => {
 var setRateLimitHeaders = (limit, remaining, rest) => {
   return {
     'X-Rate-Limit-Limit': limit,          //The number of allowed requests in the current period
-    'X-Rate-Limit-Remaining': remaining,  //The number of remaining requests in the current period
-    'X-Rate-Limit-Reset': rest            //The number of seconds left in the current period
+    'X-Rate-Limit-Remaining': remaining  //The number of remaining requests in the current period
+    // 'X-Rate-Limit-Reset': rest            //The number of seconds left in the current period
   };
 };
 
 //Rate Limiting middleware function for api
 var rateLimiter = () => {
-
+  console.log("throttle called");
   return (req, res, next) => {
     const nameSpace = 'apireq:';
     var limit;
     var remaining;
     var rest;
     //Limit API calls per user (vs per user per endpoint) - use user id if authenticated, else best guess ip address (anonymous user)
-    var userKey = nameSpace + (req.user.id || req.ip || req.ips);
+    var id = (req.user && req.user.id) ? req.user.id : req.ip || req.ips;
+    var userKey = nameSpace + id;
+    console.log("REDIS userKey", userKey);
     client.llen(userKey, (error, replies) => {
+      console.log("REDIS LLEN error, replies:", error, replies);
       //Handle errors
       if (error) {
         console.log(error);
@@ -42,27 +44,33 @@ var rateLimiter = () => {
       } else if (!replies) {
         //Batch execute atomic commands
         client.multi()
-          .rpush(userKey, new Date.now())
+          .rpush(userKey, 1)
           .expire(userKey, 60) //Set TTL to 60 seconds
-          .exec();
-        //Set Rate Limit custom headers
-        res.set(setRateLimitHeaders(limit, remaining, rest));
-        next();
-      //Limit exceeded
-      } else if (replies[0] > REQUEST_LIMIT_PER_MIN) {
-        //Set Rate Limit custom headers
-        res.set(setRateLimitHeaders(limit, remaining, rest));
-        //Set HTTP status code
-        res.status(429).send("Too Many Requests");
+          .exec((error, replies) => {
+            console.log("REDIS MULTI error, replies:", error, replies);
+            //Set Rate Limit custom headers
+            res.set(setRateLimitHeaders(REQUEST_LIMIT_PER_MIN, REQUEST_LIMIT_PER_MIN - replies[0]));
+            next();
+          });
       } else {
-        client.rpushx(userKey, (error, replies) => {
-          //Set Rate Limit custom headers
-          res.set(setRateLimitHeaders(limit, remaining, rest));
-          next();
+        //append to the list if it exists
+        client.rpushx([userKey, 1], (error, replies) => {
+          console.log("REDIS RPUSHX error, replies:", error, replies);
+          //Limit exceeded
+          if (replies > REQUEST_LIMIT_PER_MIN) {
+            //Set Rate Limit custom headers
+            res.set(setRateLimitHeaders(REQUEST_LIMIT_PER_MIN, 0));
+            //Set HTTP status code
+            res.status(429).send("Too Many Requests");
+          //Within limit, process the request
+          } else {
+            //Set Rate Limit custom headers
+            res.set(setRateLimitHeaders(REQUEST_LIMIT_PER_MIN, REQUEST_LIMIT_PER_MIN - replies[0]));
+            next();
+          }
         })
       }
     });
-
 
     // X-Rate-Limit-Limit - The number of allowed requests in the current period
     // X-Rate-Limit-Remaining - The number of remaining requests in the current period
@@ -87,3 +95,5 @@ var rateLimiter = () => {
       // });      
   }
 };
+
+module.exports = rateLimiter;
