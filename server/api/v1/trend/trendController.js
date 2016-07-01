@@ -3,8 +3,14 @@ var Article = require('tandem-db').Article;
 var methods = {};
 
 //Router param callback to decorate the request object with specified trend
+//
+/*---------------------------------------------------------------------------------------------
+ * Not neccessary in this implentation, but retained in the repo as is a useful pattern:
+ * -> Local route param callback to set route specific params on request object for easy access
+ * see 'trendRoutes.js', called by 'router.param' method
+----------------------------------------------------------------------------------------------*/
 methods.params = (req, res, next, id) => {
-  Trend.forge({ id: id })
+  Trend.forge({ _id: id })
     .fetch()
     .then((trend) => {
       //Trend not found; raise error
@@ -12,7 +18,7 @@ methods.params = (req, res, next, id) => {
         next(new Error("Trend not found"))
       } else {
         //Decorate the request object
-        req.trendId = trend.id;
+        req.trendId = trend.attributes._id;
         next();
       }
     })
@@ -42,19 +48,18 @@ methods.get = (req, res, next) => {
     })
 }
 
-//Get a single trend TODO: update to filter for a specific trend id & re-consider route architecture/modularity
+//Get a single trend (programmatic API calls only)
 methods.getOne = (req, res, next) => {
-  // Article.forge({ trend_id: req.trendId })
-  Article.forge()
-    .fetchAll()
-    .then((articles) => {
-      if (!articles) {
+  Trend.forge({ _id: req.trendId })
+    .fetch()
+    .then((trend) => {
+      if (!trend) {
         //No such articles found
         res.status(404);
         next(new Error("Trend not found"));
       } else {
         //Send the trend JSON object
-        res.status(200).json(articles);
+        res.status(200).json(trend);
       }
     })
     //Catch unexpected errors

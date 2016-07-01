@@ -1,15 +1,22 @@
 var Article = require('tandem-db').Article;
-
+var RawArticle = require('../../../config/mongoConfig');
+var uuid = require('node-uuid');
 var methods = {};
 
+/*---------------------------------------------------------------------------------------------
+ * Not neccessary in this implentation, but retained in the repo as is a useful pattern:
+ * -> Local route param callback to set route specific params on request object for easy access
+ * see 'articleRoutes.js', called by 'router.param' method
+----------------------------------------------------------------------------------------------*/
 methods.params = (req, res, next, id) => {
-  Article.forge({ id: id })
+  Article.forge({ _id: id })
     .fetch()
     .then((article) => {
       if (!article) {
         next(new Error('Article not found'));
       } else {
-        req.article = article.id;
+        req.article = article.attributes._id;
+        console.log(req.article);
         next();
       }
     })
@@ -20,7 +27,9 @@ methods.params = (req, res, next, id) => {
 
 //GET method returning all articles
 methods.get = (req, res, next) => {
-  Article.forge()
+  var trendId = req.query.id;
+
+  Article.forge({ trend_id: trendId })
     .fetchAll()
     .then((articles) => {
       if (!articles) {
@@ -37,23 +46,34 @@ methods.get = (req, res, next) => {
     })
 };
 
-//POST method for manually adding an article to the database
-methods.post = (req, res, next) => {
-  Article.forge( req.article )
-    .save()
+//GET method returning all articles
+methods.getOne = (req, res, next) => {
+  Article.forge({ _id: req.article })
+    .fetch()
     .then((article) => {
-      //Error creating article
       if (!article) {
-        next(new Error("Article not added"));
+        //Raise error - no data returned
+        next(new Error('No articles found'));
       } else {
-        //Return JSON object for article created
-        res.json(article)
+        //Send the JSON articles object
+        res.redirect('/articles');
       }
     })
-    //Catch unexpected errors
+    //Catch unanticipated errors
     .catch((err) => {
       next(err);
     })
+};
+
+//TODO: REFACTOR INTO SEPARATE ROUTE ENDPOINT WITH SEPARATE CONTROLLER - DOESNT BELONG HERE
+//POST method for manually adding an article to the database
+methods.post = (req, res, next) => {
+  //Get the upload object from req.body & add a unique upload key
+  var rawArticle = Object.assign({}, req.body, { upload_id: uuid.v1().split('-').join('') });
+  //Insert the article into MongoDb
+  RawArticle(rawArticle);
+  res.json(rawArticle)
+  next();
 };
 
 module.exports = methods;

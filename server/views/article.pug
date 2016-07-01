@@ -7,15 +7,19 @@ block content
     h1.title Tandem API Gateway - Add Article
     div.article-form
       form(method='POST', action='/api/v1/articles')
+        div.article-form-input.pub_name
+          input(type='text', name='pub_name', placeholder="Publication name" required)
+        div.article-form-input.pub_url
+          input(type='url', name='pub_url', placeholder="Publication homepage" required)
         div.article-form-input.title
-          input(type='text', name='title', placeholder="Title" required)
-        div.article-form-input.link
-          input(type='url', name='link', placeholder="Link" required)
-        div.article-form-input.image
-          input(type='url', name='image', placeholder="Image link" required)
-        div.article-form-input.summary
-          input(type='text', name='summary', placeholder="Summary" required)
-        div.article-form-input.date
-          input(type='date', name='date', placeholder="Date" required)
+          input(type='text', name='title', placeholder="Article title" required)        
+        div.article-form-input.article_url
+          input(type='url', name='article_url', placeholder="Link to article" required)        
+        div.article-form-input.image_url
+          input(type='url', name='image_url', placeholder="Image link for article")        
+        div.article-form-input.article_date
+          input(type='date', name='article_date', placeholder="Article date" required)        
+        div.article-form-input.article_summary
+          input(type='text', name='article_summary', placeholder="Article summary")
 
-        button.login-button Submit
+        button.login-button Submit Article
