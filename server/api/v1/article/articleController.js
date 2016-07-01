@@ -1,4 +1,6 @@
 var Article = require('tandem-db').Article;
+var RawArticle = require('../../../config/mongoConfig');
+var uuid = require('node-uuid');
 var methods = {};
 
 /*---------------------------------------------------------------------------------------------
@@ -65,22 +67,10 @@ methods.getOne = (req, res, next) => {
 
 //POST method for manually adding an article to the database
 methods.post = (req, res, next) => {
-  console.log(req.body);
-  // Article.forge()
-  //   .save()
-  //   .then((article) => {
-  //     //Error creating article
-  //     if (!article) {
-  //       next(new Error("Article not added"));
-  //     } else {
-  //       //Return JSON object for article created
-  //       res.json(article)
-  //     }
-  //   })
-  //   //Catch unexpected errors
-  //   .catch((err) => {
-  //     next(err);
-  //   })
+  var rawArticle = Object.assign({}, req.body, { upload_id: uuid.v1().split('-').join('') });
+  RawArticle(rawArticle);
+  res.json(rawArticle)
+  next();
 };
 
 module.exports = methods;
