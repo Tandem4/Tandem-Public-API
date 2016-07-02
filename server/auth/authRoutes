@@ -6,7 +6,7 @@ var addNewUser = require('./auth').addNewUser;
 var validateMail = require('./auth').validateMail;
 
 /*********************************************
-* Routes relative to /auth
+* NOTE: All routes relative to '/auth'
 *********************************************/
 
 //API rate limiting middleware function
