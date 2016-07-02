@@ -4,12 +4,13 @@ var config = require('../config/config');
 var checkToken = expressJwt({ secret: config.secrets.jwt } ); //returns middleware function that checks req.headers.authorization to determine whether token valid or not
 var uuid = require('node-uuid');
 var User = require('tandem-db').User;
+var mail = require('../utils/mail');
 var Promise = require('bluebird');
 
 module.exports = {
-  //TODO: THIS IS UGLY AND NEEDS REFACTORTING OF USER METHODS INTO USER CONTROLLER
   addNewUser: () => {
-    return (req, res, next) => {                   
+    return (req, res, next) => {       
+      //New user object for database; verified set to false            
       var newUser = {
         email_address: req.body.email,
         link_uuid: uuid.v1(),
@@ -17,29 +18,35 @@ module.exports = {
         api_key: req.body.password,
         api_secret: uuid.v4().split('-').join('') //uuid
       }
+      //Email verification link
       var verifyLink = req.protocol + '://' + req.headers.host + '/auth/verify?id=' + newUser.link_uuid;
-    // var messageOptions = mail.createMessage(newUser.email_address, verifyLink);
-    // mail.send(messageOptions, (err, result)=> {
-    //   if (error) {
-    //     console.log('ERROR sending mail: ', error);
-    //   } else {
-        User.forge(newUser)
-        .save()
-        .then((user) => {
-          req.user = user;
-          next();
-        })
-        .catch((err) => {
-          next(err);
-        });
-      // }
-    // })
+      //Standard email message format
+      var messageOptions = mail.createMessage(newUser.email_address, verifyLink);
+      //Send verfication email
+      mail.send(messageOptions, (err, result)=> {
+        if (error) {
+          console.log('ERROR sending mail: ', error);
+        } else {
+          //Add the user to the database in the interim
+          User.forge(newUser)
+          .save()
+          .then((user) => {
+            //Add user to request object & call next middleware
+            req.user = user;
+            next();
+          })
+          .catch((err) => {
+            next(err);
+          });
+        }
+      });
     }
   },
 
   //Verify user on login
   verifyExistingUser: () => {
     return (req, res, next) => {
+      //Get the sign in details from the request body
       var email = req.body.email;
       var password = req.body.password;
 

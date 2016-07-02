@@ -1,5 +1,8 @@
 var nodemailer = require('nodemailer');
-var CONFIG = require('../../env/constants');
+var CONFIG = require('../config/constants');
+/****************************************
+* NODEMAILER does not support ES6 syntax
+****************************************/
 
 //Configure static SMTP Server details
 const smtpTransport = nodemailer.createTransport("SMTP", {
@@ -12,7 +15,7 @@ const smtpTransport = nodemailer.createTransport("SMTP", {
 
 module.exports = {
   //Create standard mailOptions object
-  createMessage: (emailTo, verifyLink) => {
+  createMessage: function(emailTo, verifyLink) {
     var mailOptions = {
       to: emailTo,
       subject: 'Please verify your Email address',
@@ -22,12 +25,12 @@ module.exports = {
   },
 
   //Wrapper for sendMail method
-  send: (mailOptions, callback) => {
-    smtpTransport.sendMail(mailOptions,(error, response) => {
+  send: function(mailOptions) {
+    smtpTransport.sendMail(mailOptions, function (error, response) {
       if (error) {
-        callback(error);
+        console.log(error);
       } else {
-        callback(null, response);
+        console.log(response);
       }
     })
   }

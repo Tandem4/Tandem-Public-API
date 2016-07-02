@@ -10,7 +10,8 @@ methods.goToLogin = (req, res, next) => {
 //Sign and send token response for valid users
 methods.login = (req, res, next) => {
   var token = signToken(req.user.id);
-  res.json({ token: token });
+  res.set({ 'X-Access-Token' : token });
+  res.render('article');
 }
 
 //Render the static signup page for new users
@@ -26,7 +27,7 @@ methods.signUp = (req, res, next) => {
 //After adding new user to db, prompt them to validate email address
 methods.verify = (req, res, next) => {
   var token = signToken(req.user.id);
-  res.json({ token: token });
+  res.set({ 'X-Access-Token' : token });
   res.render('article');
 }
 
