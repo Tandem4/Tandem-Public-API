@@ -1,4 +1,5 @@
 var router = require('express').Router();
+var throttle = require('../middleware/apiRateLimiter');
 var authController = require('./authController');
 var verifyExistingUser = require('./auth').verifyExistingUser;
 var addNewUser = require('./auth').addNewUser;
@@ -7,6 +8,9 @@ var validateMail = require('./auth').validateMail;
 /*********************************************
 * Routes relative to /auth
 *********************************************/
+
+//API rate limiting middleware function
+router.use(throttle());
 
 //Render login page
 router.get('/login', (req, res) => {

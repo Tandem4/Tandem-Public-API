@@ -1,13 +1,12 @@
 var redis = require('redis');
+var host = process.env.TANDEM_DO_REDIS_HOST || '127.0.0.1';
+var port = process.env.TANDEM_DO_REDIS_PORT || '6379';
+var password = process.env.TANDEM_DO_REDIS_PW || '';
+const REQUEST_LIMIT_PER_MIN = 20;
 
 //use default host & port for now
-var client = redis.createClient();
-const mapSeconds = {
-  seconds: 1,
-  minutes: 60,
-  hours: 60 * 60,
-  days: 60 * 60 * 24
-};
+var client = redis.createClient(port, host);
+client.auth(password);
 
 //Handle errors
 client.on('error', (err) => {
@@ -18,127 +17,62 @@ client.on('ready', () => {
   console.log('Connected to Redis client...');
 })
 
-//Rate Limiting middleware function for api
-var rateLimiter = (rateLimits) => {
-  //rateLimits is an array containing either:
-  //- tuples of the form [requests, seconds]
-  //- objects of the form {requests: x, timeLimit: y} where timelimit is one of: seconds, minutes, hours, days
+//Helper function for creating Rate Limit custom headers object
+var setRateLimitHeaders = (limit, remaining) => {
+  return {
+    'X-Rate-Limit-Limit': limit,          //The number of allowed requests in the current period
+    'X-Rate-Limit-Remaining': remaining  //The number of remaining requests in the current period
+    // 'X-Rate-Limit-Reset': rest            //The number of seconds left in the current period
+  };
+};
 
-    //Deal with the case where rateLimits is a single constraint but has not been nested in a tuple
-    if (rateLimits.length === 2 && typeof rateLimits[0] === 'number') {
-      rateLimits = [rateLimits];
-    };
-
-    //Return array of all limits converted to tuple form [requests, seconds]
-    var tupledLimits = rateLimits.map((limit) => {
-      //If is an array, already in tuple form
-      if (Array.isArray(limit)) {
-        return limit;
-      } else if (limit && typeof limit === 'object') {
-        //If limit is in object form, get the key representing the time dimension
-        Object.keys(limit).forEach((key) => {
-          if (!key === 'requests') {
-            //Restate contraint in tuple form, calculted in seconds equivalent
-            var tupledLimit = [limit.requests, mapSeconds[key] * limit[key]];
+//Rate Limiting middleware function for api - use limited by user only (vs by user + endpoint)
+var rateLimiter = () => {
+  return (req, res, next) => {
+    //Redis namespace for rate limiting datastructures - Redis LIST)
+    const nameSpace = 'apireq:';
+    //Get user id if authenticated, else try and id anonymous users by ip address (best guess)
+    var id = (req.user && req.user.id) ? req.user.id : req.ip;
+    //Redis userKey for LIST datastructure
+    var userKey = nameSpace + id;
+    //Get List length for current userKey
+    client.llen(userKey, (error, replies) => {
+      //Handle errors
+      if (error) {
+        console.log(error);
+        next(err);        
+      //No previous requests; generate List & process API request
+      } else if (!replies) {
+        //Batch execute atomic commands
+        client.multi()
+          .rpush(userKey, 1)
+          .expire(userKey, 60) //Set userKey Time To Live (TTL) to 60 seconds
+          .exec((error, replies) => {
+            //Set Rate Limit custom headers
+            res.set(setRateLimitHeaders(REQUEST_LIMIT_PER_MIN, REQUEST_LIMIT_PER_MIN - replies[0]));
+            //Process the API request
+            next();
+          });
+      } else {
+        //append to the list if it exists
+        client.rpushx([userKey, 1], (error, replies) => {
+          //Limit exceeded
+          if (replies > REQUEST_LIMIT_PER_MIN) {
+            //Set Rate Limit custom headers
+            res.set(setRateLimitHeaders(REQUEST_LIMIT_PER_MIN, 0));
+            //Set HTTP status code
+            res.status(429).send("Too Many Requests");
+          //Within limit, process the request
+          } else {
+            //Set Rate Limit custom headers
+            res.set(setRateLimitHeaders(REQUEST_LIMIT_PER_MIN, REQUEST_LIMIT_PER_MIN - replies));
+            //Process the API request
+            next();
           }
-        });
-        //Return the new tuple
-        return tupledLimit;
+        })
       }
     });
-
-    //Sort the limits in ascending order by number of seconds
-    var sortedLimits = tupledLimits.sort((a, b) => {
-      return (a[1] > b[1] ? 1 : 0);
-    })
-
-  //Return the throttling middleware function, retaining access via closure to the sorted rate limits
-  //Leaky bucket implementation
-  return (req, res, next) => {
-    const nameSpace = 'apireq:';
-    //Limit API calls per user (vs per user per endpoint) - use user id if authenticated, else best guess ip address (anonymous user)
-    var userKey = nameSpace + (req.user.id || req.ip || req.ips);
-
-    //No rate limits in place
-    if (!sortedLimits.length) {
-      next();
-    } else {
-      var timeStamp = Date.now();
-      //Thottle
-      // sortedLimits.forEach((limit) => {
-        client.multi()
-          .zadd(userKey, timeStamp, JSON.stringify(timeStamp));
-          .
-
-        //For each request added to Redis List (linked list), set TTL = maximum time constraint, value = current time stamp
-        //[front of list = oldest, back of list = newest]
-        //No of elements = total no of requests for the specified TTL interval
-        //
-
-
-      // });      
-      
-
-    }
-    console.log('hello');
-
   }
-}
+};
 
-
-rateLimiter([1,10]);
-
-
-
-
-//PSEUDOCODE - EXPRESS MIDDLEWARE THROTTLE FUNCTION:
-//for each user
-  //for each new api request
-    //check the elapsed since most recent request
-    //iterate over the established rate constraints per smallest unit of time to largest
-      //if still inside current time constraint, block the request & respond with 429 status, updating headers
-      //else check time elapsed since next most recent request
-        //if still inside next largest time constraint, block the request & respond with 429 status, updating headers
-        //else
-          //set the TTL time to live equal to the time period for the current constraint
-          //increment Redis timestamped request count by one accordingly
-          //process the api request
-//
-//
-//Redis Data Structure:
-//A list of requests per each user
-//key for each user:
-  //loggedInUser? -> namespace + user_id per decoded token + route
-  //anonymousUser? -> namespace + ip + route
-//value = timestamp
-//list (array) length - dictated by rate constraint for largest user of time, expressed in seconds
-
-
-// //Redis example
-// var client = redis.createClient(), set_size = 20;
- 
-// client.sadd("bigset", "a member");
-// client.sadd("bigset", "another member");
- 
-// while (set_size > 0) {
-//     client.sadd("bigset", "member " + set_size);
-//     set_size -= 1;
-// }
- 
-// // multi chain with an individual callback 
-// client.multi()
-//     .scard("bigset")
-//     .smembers("bigset")
-//     .keys("*", function (err, replies) {
-//         // NOTE: code in this callback is NOT atomic 
-//         // this only happens after the the .exec call finishes. 
-//         client.mget(replies, redis.print);
-//     })
-//     .dbsize()
-//     .exec(function (err, replies) {
-//       console.log(replies);
-//         console.log("MULTI got " + replies.length + " replies");
-//         replies.forEach(function (reply, index) {
-//             console.log("Reply " + index + ": " + reply.toString());
-//         });
-//     });
+module.exports = rateLimiter;

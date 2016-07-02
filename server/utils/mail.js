@@ -1,5 +1,9 @@
 var nodemailer = require('nodemailer');
-var CONFIG = require('../../env/constants');
+var CONFIG = require('../config/constants');
+var Promise = require('bluebird');
+/****************************************
+* NODEMAILER does not support ES6 syntax
+****************************************/
 
 //Configure static SMTP Server details
 const smtpTransport = nodemailer.createTransport("SMTP", {
@@ -12,7 +16,7 @@ const smtpTransport = nodemailer.createTransport("SMTP", {
 
 module.exports = {
   //Create standard mailOptions object
-  createMessage: (emailTo, verifyLink) => {
+  createMessage: function(emailTo, verifyLink) {
     var mailOptions = {
       to: emailTo,
       subject: 'Please verify your Email address',
@@ -21,15 +25,17 @@ module.exports = {
     return mailOptions;
   },
 
-  //Wrapper for sendMail method
-  send: (mailOptions, callback) => {
-    smtpTransport.sendMail(mailOptions,(error, response) => {
-      if (error) {
-        callback(error);
-      } else {
-        callback(null, response);
-      }
-    })
+  //Wrapper promise for sendMail method
+  send: function(mailOptions) {
+    return new Promise(function(resolve, reject) {
+      smtpTransport.sendMail(mailOptions, function (error, response) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(response);
+        }
+      });
+    });
   }
 };
 
