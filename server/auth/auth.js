@@ -23,11 +23,8 @@ module.exports = {
       //Standard email message format
       var messageOptions = mail.createMessage(newUser.email_address, verifyLink);
       //Send verfication email
-      mail.send(messageOptions, (err, result)=> {
-        if (error) {
-          console.log('ERROR sending mail: ', error);
-        } else {
-          //Add the user to the database in the interim
+      mail.send(messageOptions)
+        .then((msgResponse)=> {
           User.forge(newUser)
           .save()
           .then((user) => {
@@ -38,8 +35,12 @@ module.exports = {
           .catch((err) => {
             next(err);
           });
-        }
-      });
+        })
+        .catch((err) => {
+          //Log any errors sending the email
+          console.log(err);
+          next(err);
+        });
     }
   },
 
@@ -100,28 +101,6 @@ module.exports = {
         .catch((err) => {
           next(err);
         });
-    }
-  },
-
-  //Update the user info on the request object
-  getFreshUser: () => {
-    return (req, res, next) => {
-      //TODO: THIS IS UGLY AND NEEDS REFACTORTING OF USER METHODS INTO USER CONTROLLER
-      User.forge({ id: req.user.id })
-        .fetch()
-        .then((user) => {
-          if (!user) {
-            //Implies JWT did not decoded to a valid user per our DB
-            res.status(401).send('Unauthorised');
-          } else {
-            //update req.user with fresh user from stale token data
-            req.user = user;
-            next();
-          }
-        })
-        .catch((err) => {
-          next(err);
-        })
     }
   },
 

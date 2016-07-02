@@ -1,5 +1,6 @@
 var nodemailer = require('nodemailer');
 var CONFIG = require('../config/constants');
+var Promise = require('bluebird');
 /****************************************
 * NODEMAILER does not support ES6 syntax
 ****************************************/
@@ -24,15 +25,17 @@ module.exports = {
     return mailOptions;
   },
 
-  //Wrapper for sendMail method
+  //Wrapper promise for sendMail method
   send: function(mailOptions) {
-    smtpTransport.sendMail(mailOptions, function (error, response) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log(response);
-      }
-    })
+    return new Promise(function(resolve, reject) {
+      smtpTransport.sendMail(mailOptions, function (error, response) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(response);
+        }
+      });
+    });
   }
 };
 
