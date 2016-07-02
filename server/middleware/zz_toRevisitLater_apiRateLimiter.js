@@ -112,7 +112,7 @@ rateLimiter([1,10]);
 //Redis Data Structure:
 //A list of requests per each user
 //key for each user:
-  //loggedInUser? -> namespace + user_id per decoded token + route
+  //loggedInUser? -> namespace + userid per decoded token + route
   //anonymousUser? -> namespace + ip + route
 //value = timestamp
 //list (array) length - dictated by rate constraint for largest user of time, expressed in seconds

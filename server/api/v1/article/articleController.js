@@ -1,4 +1,5 @@
 var Article = require('tandem-db').Article;
+var Trend = require('tandem-db').Trend;
 var RawArticle = require('../../../config/mongoConfig');
 var uuid = require('node-uuid');
 var methods = {};
@@ -9,13 +10,13 @@ var methods = {};
  * see 'articleRoutes.js', called by 'router.param' method
 ----------------------------------------------------------------------------------------------*/
 methods.params = (req, res, next, id) => {
-  Article.forge({ _id: id })
+  Article.forge({ id: id })
     .fetch()
     .then((article) => {
       if (!article) {
         next(new Error('Article not found'));
       } else {
-        req.article = article.attributes._id;
+        req.article = article.attributes.id;
         console.log(req.article);
         next();
       }
@@ -28,27 +29,40 @@ methods.params = (req, res, next, id) => {
 //GET method returning all articles
 methods.get = (req, res, next) => {
   var trendId = req.query.id;
-
-  Article.forge({ trend_id: trendId })
-    .fetchAll()
+  Trend.where('id', trendId)
+    .fetch({ withRelated: ['articles'] })
     .then((articles) => {
       if (!articles) {
-        //Raise error - no data returned
         next(new Error('No articles found'));
       } else {
-        //Send the JSON articles object
         res.json(articles);
       }
     })
     //Catch unanticipated errors
     .catch((err) => {
       next(err);
-    })
+    });
+
+  // Article.forge({ trendid: trendId })
+  //   .fetchAll()
+  //   .then((articles) => {
+  //     if (!articles) {
+  //       //Raise error - no data returned
+  //       next(new Error('No articles found'));
+  //     } else {
+  //       //Send the JSON articles object
+  //       res.json(articles);
+  //     }
+  //   })
+  //   //Catch unanticipated errors
+  //   .catch((err) => {
+  //     next(err);
+  //   })
 };
 
 //GET method returning all articles
 methods.getOne = (req, res, next) => {
-  Article.forge({ _id: req.article })
+  Article.forge({ id: req.article })
     .fetch()
     .then((article) => {
       if (!article) {
@@ -69,7 +83,7 @@ methods.getOne = (req, res, next) => {
 //POST method for manually adding an article to the database
 methods.post = (req, res, next) => {
   //Get the upload object from req.body & add a unique upload key
-  var rawArticle = Object.assign({}, req.body, { upload_id: uuid.v1().split('-').join('') });
+  var rawArticle = Object.assign({}, req.body, { uploadid: uuid.v1().split('-').join('') });
   //Insert the article into MongoDb
   RawArticle(rawArticle);
   res.json(rawArticle)
