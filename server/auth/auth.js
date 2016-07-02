@@ -1,7 +1,7 @@
 var jwt = require('jsonwebtoken');
 var expressJwt = require('express-jwt');
 var config = require('../config/config');
-var checkToken = expressJwt({ secret: config.secrets.jwt } ); //returns middleware function that checks req.headers.authorization to determine whether token valid or not
+var checkToken = expressJwt({ secret: config.secrets.jwt } );
 var uuid = require('node-uuid');
 var User = require('tandem-db').User;
 var mail = require('../utils/mail');
