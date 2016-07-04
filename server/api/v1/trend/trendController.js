@@ -69,4 +69,23 @@ methods.getOne = (req, res, next) => {
 
 }
 
+//GET method returning all articles for the specified trend
+methods.getArticles = (req, res, next) => {
+  console.log(req.query.id);
+  var trendId = req.query.id;
+  Trend.where({ 'id': trendId })
+    .fetch({ withRelated: ['articles'] })
+    .then((articles) => {
+      if (!articles) {
+        next(new Error('No articles found'));
+      } else {
+        res.json(articles);
+      }
+    })
+    //Catch unanticipated errors
+    .catch((err) => {
+      next(err);
+    });
+};
+
 module.exports = methods;

@@ -28,8 +28,9 @@ methods.params = (req, res, next, id) => {
 
 //GET method returning all articles
 methods.get = (req, res, next) => {
+  console.log(req.query.id);
   var trendId = req.query.id;
-  Trend.where('id', trendId)
+  Trend.where({ 'id': trendId })
     .fetch({ withRelated: ['articles'] })
     .then((articles) => {
       if (!articles) {
