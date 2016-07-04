@@ -8,11 +8,11 @@ var trendController = require('./trendController');
 //Local route param callback to set route specific params on request object for easy access
 // router.param('id', trendController.params);
 
-//Collection routes - all trends
+//Get all trends
 router.route('/')
   .get(trendController.get);
 
-
+//Get all articles for specified trend
 router.route('/articles')
   .get(trendController.getArticles);
 
