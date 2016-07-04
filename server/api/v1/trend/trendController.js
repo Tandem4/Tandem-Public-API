@@ -10,7 +10,7 @@ var methods = {};
  * see 'trendRoutes.js', called by 'router.param' method
 ----------------------------------------------------------------------------------------------*/
 methods.params = (req, res, next, id) => {
-  Trend.forge({ _id: id })
+  Trend.forge({ id: id })
     .fetch()
     .then((trend) => {
       //Trend not found; raise error
@@ -18,7 +18,7 @@ methods.params = (req, res, next, id) => {
         next(new Error("Trend not found"))
       } else {
         //Decorate the request object
-        req.trendId = trend.attributes._id;
+        req.trendId = trend.attributes.id;
         next();
       }
     })
@@ -50,7 +50,7 @@ methods.get = (req, res, next) => {
 
 //Get a single trend (programmatic API calls only)
 methods.getOne = (req, res, next) => {
-  Trend.forge({ _id: req.trendId })
+  Trend.forge({ id: req.trendId })
     .fetch()
     .then((trend) => {
       if (!trend) {
@@ -68,5 +68,23 @@ methods.getOne = (req, res, next) => {
     })
 
 }
+
+//GET method returning all articles for the specified trend
+methods.getArticles = (req, res, next) => {
+  var trendId = req.query.id;
+  Trend.where({ 'id': trendId })
+    .fetch({ withRelated: ['articles'] })
+    .then((articles) => {
+      if (!articles) {
+        next(new Error('No articles found'));
+      } else {
+        res.json(articles.relations.articles);
+      }
+    })
+    //Catch unanticipated errors
+    .catch((err) => {
+      next(err);
+    });
+};
 
 module.exports = methods;
