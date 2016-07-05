@@ -31,6 +31,7 @@ methods.params = (req, res, next, id) => {
 //Get all trends (need to specifiy a time 'where' constrain?)
 methods.get = (req, res, next) => {
   Trend.forge()
+    .orderBy('rank', 'DESC')
     .fetchAll()
     .then((trends) => {
       //No trends found
