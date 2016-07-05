@@ -12,10 +12,6 @@ var trendController = require('./trendController');
 router.route('/')
   .get(trendController.get);
 
-//Get all articles for specified trend
-router.route('/articles')
-  .get(trendController.getArticles);
-
 //Instance routes - specific trend. Only used by programmatic API calls to this endpoint (vs requests from the client itself)
 router.route('/:id')
   .get(trendController.getOne);
