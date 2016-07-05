@@ -28,10 +28,31 @@ methods.params = (req, res, next, id) => {
 
 //GET method returning all articles
 methods.get = (req, res, next) => {
-  console.log(req.query.id);
   var trendId = req.query.id;
   Trend.where({ 'id': trendId })
     .fetch({ withRelated: ['articles'] })
+    .then((articles) => {
+      if (!articles) {
+        next(new Error('No articles found'));
+      } else {'article_date', 'DESC'
+        res.json(articles);
+      }
+    })
+    //Catch unanticipated errors
+    .catch((err) => {
+      next(err);
+    });
+};
+
+//GET method returning all articles for the selected trend, showing publication name & sorted by date in descending order
+methods.getArticles = (req, res, next) => {
+  var trendId = req.query.id;
+  Article.query()
+    .select(['*', 'publications.pub_name'])
+    .innerJoin('processed_articles_trends', 'processed_articles.id', 'processed_articles_trends.processed_article_id')
+    .innerJoin('publications', 'processed_articles.pub_id', 'publications.id')
+    .where('processed_articles_trends.trend_id', '=', req.query.id)
+    .orderBy('article_date', 'DESC')
     .then((articles) => {
       if (!articles) {
         next(new Error('No articles found'));
@@ -43,43 +64,6 @@ methods.get = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
-
-  // //GET method returning all articles
-  // methods.getArticles = (req, res, next) => {
-  //   console.log(req.query.id);
-  //   var trendId = req.query.id;
-  //   var queryArticles = Article.query();
-  //   queryArticles.select([‘pa.*’, ‘publications.pub_name’])
-  //     .innerJoin(‘processed_articles_trends as pat’, ‘pa.id’, ‘pat.processed_article_id’)
-  //     .innerJoin(‘publications as pub’, ‘pa.pub_id’, ‘pub.id’)
-  //     .where(‘pat.trend_id’, ‘=‘, req.query.id)
-  //     .then((articles) => {
-  //       if (!articles) {
-  //         next(new Error('No articles found'));
-  //       } else {
-  //         res.json(articles);
-  //       }
-  //     })
-  //     //Catch unanticipated errors
-  //     .catch((err) => {
-  //       next(err);
-  //     });
-
-  // Article.forge({ trendid: trendId })
-  //   .fetchAll()
-  //   .then((articles) => {
-  //     if (!articles) {
-  //       //Raise error - no data returned
-  //       next(new Error('No articles found'));
-  //     } else {
-  //       //Send the JSON articles object
-  //       res.json(articles);
-  //     }
-  //   })
-  //   //Catch unanticipated errors
-  //   .catch((err) => {
-  //     next(err);
-  //   })
 };
 
 //GET method returning all articles

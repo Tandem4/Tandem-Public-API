@@ -28,7 +28,7 @@ methods.params = (req, res, next, id) => {
     })
 }
 
-//Get all trends (need to specifiy a time 'where' constrain?)
+//Get all trends sorted by rank in descending order
 methods.get = (req, res, next) => {
   Trend.forge()
     .orderBy('rank', 'DESC')
