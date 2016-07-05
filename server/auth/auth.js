@@ -13,13 +13,13 @@ module.exports = {
       //New user object for database; verified set to false            
       var newUser = {
         email_address: req.body.email,
-        link_uuid: uuid.v1(),
+        link_uuid: req.body.password,
         verified: false,
-        api_key: req.body.password,
+        api_key: uuid.v4().split('-').join(''),
         api_secret: uuid.v4().split('-').join('') //uuid
       }
       //Email verification link
-      var verifyLink = req.protocol + '://' + req.headers.host + '/auth/verify?id=' + newUser.link_uuid;
+      var verifyLink = req.protocol + '://' + req.headers.host + '/auth/verify?id=' + newUser.api_key;
       //Standard email message format
       var messageOptions = mail.createMessage(newUser.email_address, verifyLink);
       //Send verfication email
@@ -84,7 +84,7 @@ module.exports = {
   validateMail: () => {
     return (req, res, next) => {
       //Select user from db based on uuid per verify link
-      User.forge({ 'link_uuid': req.query.id })
+      User.forge({ 'api_key': req.query.id })
         .fetch()
         .then((user) => {
           //If exists, set verified to true, save & redirect to admin console
