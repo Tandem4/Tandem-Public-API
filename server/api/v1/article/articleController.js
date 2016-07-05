@@ -1,5 +1,4 @@
 var Article = require('tandem-db').Article;
-var Trend = require('tandem-db').Trend;
 var RawArticle = require('../../../config/mongoConfig');
 var uuid = require('node-uuid');
 var methods = {};
@@ -24,24 +23,6 @@ methods.params = (req, res, next, id) => {
     .catch((err) => {
       next(err);
     })
-};
-
-//GET method returning all articles
-methods.get = (req, res, next) => {
-  var trendId = req.query.id;
-  Trend.where({ 'id': trendId })
-    .fetch({ withRelated: ['articles'] })
-    .then((articles) => {
-      if (!articles) {
-        next(new Error('No articles found'));
-      } else {'article_date', 'DESC'
-        res.json(articles);
-      }
-    })
-    //Catch unanticipated errors
-    .catch((err) => {
-      next(err);
-    });
 };
 
 //GET method returning all articles for the selected trend, showing publication name & sorted by date in descending order
