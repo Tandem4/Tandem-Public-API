@@ -47,7 +47,7 @@ methods.getArticles = (req, res, next) => {
     });
 };
 
-//GET method returning all articles
+//GET method returning one article
 methods.getOne = (req, res, next) => {
   Article.forge({ id: req.article })
     .fetch()
