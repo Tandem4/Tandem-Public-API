@@ -28,9 +28,10 @@ methods.params = (req, res, next, id) => {
     })
 }
 
-//Get all trends (need to specifiy a time 'where' constrain?)
+//Get all trends sorted by rank in descending order
 methods.get = (req, res, next) => {
   Trend.forge()
+    .orderBy('rank', 'DESC')
     .fetchAll()
     .then((trends) => {
       //No trends found
@@ -68,23 +69,5 @@ methods.getOne = (req, res, next) => {
     })
 
 }
-
-//GET method returning all articles for the specified trend
-methods.getArticles = (req, res, next) => {
-  var trendId = req.query.id;
-  Trend.where({ 'id': trendId })
-    .fetch({ withRelated: ['articles'] })
-    .then((articles) => {
-      if (!articles) {
-        next(new Error('No articles found'));
-      } else {
-        res.json(articles.relations.articles);
-      }
-    })
-    //Catch unanticipated errors
-    .catch((err) => {
-      next(err);
-    });
-};
 
 module.exports = methods;

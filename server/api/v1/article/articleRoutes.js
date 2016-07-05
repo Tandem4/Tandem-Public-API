@@ -13,7 +13,7 @@ var verifyUser = require('../../../auth/auth').verifyUser;
 router.param('id', articleController.params);
 
 router.route('/')
-  .get(articleController.get)
+  .get(articleController.getArticles)
 
 // router.post('/', verifyUser(), articleController.post); //add a story
 router.post('/', articleController.post); //add a story
