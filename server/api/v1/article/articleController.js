@@ -30,6 +30,7 @@ var methods = {};
 
 //GET method returning all articles for the selected trend, showing publication name & sorted by date in descending order
 methods.getArticles = (req, res, next) => {
+  console.log("this hit");
   var trendId = req.query.id;
   Article.query()
     .innerJoin('processed_articles_trends', 'processed_articles.id', 'processed_articles_trends.processed_article_id')
@@ -39,6 +40,7 @@ methods.getArticles = (req, res, next) => {
     .select('publications.pub_name')
     .orderBy('article_date', 'DESC')
     .then((articles) => {
+      console.log(articles);
       if (!articles) {
         next(new Error('No articles found'));
       } else {

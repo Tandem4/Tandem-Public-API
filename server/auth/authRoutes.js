@@ -29,12 +29,12 @@ router.post('/signup', addNewUser(), authController.signUp);
 //Update user info based on email verification & return signed JWT token - no auth
 router.get('/verify', validateMail(), authController.verify);
 
-//Verify is existing user & log them in - return signed JWT token - check login details & return token in authController
-router.post('/dashboard', verifyExistingUser(), authController.dashboard);
+// //Verify is existing user & log them in - return signed JWT token - check login details & return token in authController
+// router.post('/dashboard', verifyExistingUser(), authController.dashboard);
 
 // router.use(decodeToken());
 
 //Check user already signed in & valid
-router.post('/newkey', decodeToken(), authController.dashboard);
+// router.post('/newkey', decodeToken(), authController.dashboard);
 
 module.exports = router;
