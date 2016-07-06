@@ -39,4 +39,7 @@ router.post('/dashboard', verifyExistingUser(), authController.dashboard);
 //BEARER AUTH - check user already signed in & valid, generate new Api key pair & re-render
 router.post('/newkey', decodeToken(), newApiKey(), authController.dashboard);
 
+//BEARER AUTH - log user out
+router.post('/logout', decodeToken(), authController.logOut);
+
 module.exports = router;

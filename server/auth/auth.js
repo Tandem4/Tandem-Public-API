@@ -138,7 +138,9 @@ module.exports = {
   decodeToken: () => {
     return (req, res, next) => {
       //Parse the token from the cookie header on the request & add it to the Auth header for purposes of the Jwt checkToken function
-      var accessToken = req.headers.cookie.substring(13) || '';
+      if (req.headers.cookie) {
+        var accessToken = req.headers.cookie.substring(13);   
+      }
       req.headers.authorization = 'Bearer ' + accessToken;
       // If valid token, attaches decoded token to req.user & calls next(); else calls next() with an error
       checkToken(req, res, next);
