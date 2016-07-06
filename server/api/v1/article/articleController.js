@@ -29,8 +29,8 @@ var methods = {};
 // };
 
 //GET method returning all articles for the selected trend, showing publication name & sorted by date in descending order
+//NO AUTH
 methods.getArticles = (req, res, next) => {
-  console.log("this hit");
   var trendId = req.query.id;
   Article.query()
     .innerJoin('processed_articles_trends', 'processed_articles.id', 'processed_articles_trends.processed_article_id')
@@ -40,7 +40,6 @@ methods.getArticles = (req, res, next) => {
     .select('publications.pub_name')
     .orderBy('article_date', 'DESC')
     .then((articles) => {
-      console.log(articles);
       if (!articles) {
         next(new Error('No articles found'));
       } else {
@@ -54,6 +53,7 @@ methods.getArticles = (req, res, next) => {
 };
 
 //GET method returning one article
+//NO AUTH
 methods.getOne = (req, res, next) => {
   Article.forge({ id: req.article })
     .fetch()
@@ -73,11 +73,15 @@ methods.getOne = (req, res, next) => {
 };
 
 //GET method returning all articles for the selected trend, showing publication name & sorted by date in descending order
+//NO AUTH
 methods.uploadTemplate = (req, res, next) => {
-  console.log('**REQ.USER.ID**==========/uploadTemplate/=====================', req.user.id);
+  console.log('**REQ.USER.ID**==========/uploadTemplate/=====================', req.user);
+  //Generate the signed token
   var token = signToken(req.user.id);
+  //Set cookie; use 'HttpOnly' flag - only server may attempt to access cookie, not client (mitigate XSS attacks); A
   res.set({
-    'Set-Cookie': 'access_token=' + token
+    'Set-Cookie': 'access_token=' + token + '; Path=/; HttpOnly',
+    'Access-Control-Allow-Credentials': true
   });
   res.render('article');
 };
@@ -85,16 +89,20 @@ methods.uploadTemplate = (req, res, next) => {
 
 //TODO: REFACTOR INTO SEPARATE ROUTE ENDPOINT WITH SEPARATE CONTROLLER - DOESNT BELONG HERE?
 //POST method for manually adding an article to the database
+//BEARER AUTH
 methods.post = (req, res, next) => {
   console.log('**REQ.USER.ID**=============/postRestricted/==================', req.user.id);
-  var token = signToken(req.user.id);
-  res.set({
-    'Set-Cookie': 'access_token=' + token
-  });
   //Get the upload object from req.body & add a unique upload key
   var rawArticle = Object.assign({}, req.body, { uploadId: uuid.v1().split('-').join('') });
   //Insert the article into MongoDb
   RawArticle(rawArticle);
+  //Generate the signed token
+  var token = signToken(req.user.id);
+  //Set cookie; use 'HttpOnly' flag - only server may attempt to access cookie, not client (mitigate XSS attacks); A
+  res.set({
+    'Set-Cookie': 'access_token=' + token + '; Path=/; HttpOnly',
+    'Access-Control-Allow-Credentials': true
+  });
   res.json(rawArticle)
   next();
 };
