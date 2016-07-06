@@ -12,14 +12,15 @@ var decodeToken = require('../../../auth/auth').decodeToken;
 ----------------------------------------------------------------------------------------------*/
 // router.param('id', articleController.params);
 
-//Non authenticated routes
+//NO AUTH
 router.route('/')
   .get(articleController.getArticles) //Get articles for the selected trend
   
+//NO AUTH
 router.route('/:id')
   .get(articleController.getOne)
 
-//Authenticated routes - check user signed in & authenticated
+//BEARER AUTH - check user signed in & authenticated
 router.post('/restricted', decodeToken(), articleController.uploadTemplate); //Go to the manual article upload template
 router.post('/restricted/add', decodeToken(), articleController.post); //add a story
 

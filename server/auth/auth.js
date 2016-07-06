@@ -1,7 +1,9 @@
 var jwt = require('jsonwebtoken');
 var expressJwt = require('express-jwt');
 var config = require('../config/config');
-var checkToken = expressJwt({ secret: config.secrets.jwt } );
+var jwtSecret = config.secrets.jwt;
+var jwtExpiry = config.expireTime;
+var checkToken = expressJwt({ secret: jwtSecret } );
 var uuid = require('node-uuid');
 var User = require('tandem-db').User;
 var mail = require('../utils/mail');
@@ -128,21 +130,20 @@ module.exports = {
   decodeToken: () => {
     return (req, res, next) => {
 
-      console.log(req.headers);
-      //if token placed in query string, place on the headers so checkToken function can check it.
-      if (req.query && req.query.hasOwnProperty('access_token')) {
-        req.headers.authorization = 'Bearer ' + req.query.access_token;
-      }
-      // Calls next() if valid token & attaches decoded token to req.user; else calls next() with an error
+      //Parse the token from the cookie header on the request & add it to the Auth header for purposes of the Jwt checkToken function
+      var accessToken = req.headers.cookie.substring(13) || '';
+      req.headers.authorization = 'Bearer ' + accessToken;
+
+      // If valid token, attaches decoded token to req.user & calls next(); else calls next() with an error
       checkToken(req, res, next);
     }
   },
 
-  //Sign the token
+  //Sign the token with user id, secret & expiry time
   signToken: (id) => {
     return jwt.sign(
-      {id: id},
-      config.secrets.jwt,
-      {expiresIn: config.expireTime})
+      { id: id },
+      jwtSecret,
+      { expiresIn: jwtExpiry })
   }
 };

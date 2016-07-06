@@ -10,31 +10,29 @@ var validateMail = require('./auth').validateMail;
 * NOTE: All routes relative to '/auth'
 *********************************************/
 
-//API rate limiting middleware function - applies to all /auth routes
+//ALL ROUTES (/auth)- API rate limiting middleware function
 router.use(throttle());
 
-//Render login page - no auth
+//NO AUTH - render login page
 router.get('/login', (req, res) => {
   res.render('login');
 });
 
-//Render new sign up page - no auth
+//NO AUTH - render new sign up page
 router.get('/signup', (req, res) => {
   res.render('signup');
 });
 
-//Process initial signup details & send verification email - no auth
+//NO AUTH - process initial signup details & send verification email
 router.post('/signup', addNewUser(), authController.signUp);
 
-//Update user info based on email verification & return signed JWT token - no auth
+//NO AUTH - update user info based on email verification
 router.get('/verify', validateMail(), authController.verify);
 
-// //Verify is existing user & log them in - return signed JWT token - check login details & return token in authController
-// router.post('/dashboard', verifyExistingUser(), authController.dashboard);
+//BASIC AUTH - verify is existing user & log them in - return signed JWT token - check login details & return token in authController
+router.post('/dashboard', verifyExistingUser(), authController.dashboard);
 
-// router.use(decodeToken());
-
-//Check user already signed in & valid
+//BEARER AUTH - check user already signed in & valid
 // router.post('/newkey', decodeToken(), authController.dashboard);
 
 module.exports = router;
