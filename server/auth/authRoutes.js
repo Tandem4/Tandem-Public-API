@@ -30,10 +30,10 @@ router.get('/signup', (req, res) => {
 //NO AUTH - process initial signup details & send verification email
 router.post('/signup', addNewUser(), authController.signUp);
 
-//NO AUTH - update user info based on email verification
+//NO AUTH - update user info based on email verification success / failure
 router.get('/verify', validateMail(), authController.verify);
 
-//BASIC AUTH - verify is existing user & log them in - return signed JWT token - check login details & return token in authController
+//BASIC AUTH - verify existing user, login & return token in authController
 router.post('/dashboard', verifyExistingUser(), authController.dashboard);
 
 //BEARER AUTH - check user already signed in & valid, generate new Api key pair & re-render

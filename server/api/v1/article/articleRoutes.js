@@ -9,9 +9,9 @@ var decodeToken = require('../../../auth/auth').decodeToken;
 /*---------------------------------------------------------------------------------------------
  * Not neccessary in this implementation, but retained in the repo as is a useful pattern:
  * -> Local route param callback to set route specific params on request object for easy access
- * (see articleController.params)
+ * -> (see articleController.params)
 -----------------------------------------------------------------------------------------------
-  router.param('id', articleController.params);
+ // router.param('id', articleController.params);
 ----------------------------------------------------------------------------------------------*/
 
 //NO AUTH
@@ -22,7 +22,7 @@ router.route('/')
 router.route('/:id')
   .get(articleController.getOne)
 
-//BEARER AUTH - check user signed in & authenticated
+//BEARER AUTH - check user signed in & valid
 router.post('/restricted', decodeToken(), articleController.uploadTemplate); //Go to the manual article upload template
 router.post('/restricted/add', decodeToken(), articleController.post); //add a story
 

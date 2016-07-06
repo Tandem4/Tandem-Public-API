@@ -7,23 +7,22 @@ var User = require('tandem-db').User;
 
 var methods = {};
 
-//Render the static signup page for new users
+//NO AUTH - render the static signup page for new users
 methods.goToSignup = (req, res, next) => {
   res.render('signup');
 };
 
-//After adding new user to db, prompt them to validate email address
+//NO AUTH - after adding new user to db, prompt them to validate email address
 methods.signUp = (req, res, next) => {
   res.send('<div>Please verify your email address by clicking the link in the email sent to you & then logging in <a href="/auth/login">here</a></div>');
 };
 
-//After adding new user to db, prompt them to validate email address
-//TODO - there need to be two ways of accessing this endpoint (i.e. two endpoints - one for web client, one for straight API call)
+//NO AUTH - after adding new user to db, prompt them to validate email address
 methods.verify = (req, res, next) => {
   res.send('<div>Mail successfully validated! Please <a href="/auth/login">login</a> to continue.</div>');
 };
 
-//Sign and send token response for valid users; display api key pair
+//BASIC AUTH - sign and send token response for valid users; display api key pair in admin dashboard
 methods.dashboard = (req, res, next) => {
   //Get the user's API key & secret to display on the page
   User.forge({ id: req.user.id })
@@ -52,7 +51,7 @@ methods.dashboard = (req, res, next) => {
     });
 };
 
-//After adding new user to db, prompt them to validate email address
+//BEARER AUTH - after adding new user to db, prompt them to validate email address
 methods.logOut = (req, res, next) => {
   res.set({
     'Set-Cookie': 'access_token=deleted; Path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly'
