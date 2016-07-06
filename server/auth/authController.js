@@ -1,4 +1,5 @@
 var signToken = require('./auth').signToken;
+var User = require('tandem-db').User;
 
 var methods = {};
 
@@ -13,7 +14,24 @@ methods.login = (req, res, next) => {
   //Send the JWT token back in a custom response header
   res.set('X-Access-Token', token);
   //Render the article page for manually submitting an article
-  res.render('article');
+  
+  User.forge({ id: req.user.id })
+    .fetch()
+    .then((user) => {
+      if (!user) {
+        res.status(403).send('Forbidden - user not found')
+      } else {
+        res.render('admin', {
+          api: {
+            key: user.attributes.api_key,
+            secret: user.attributes.api_secret
+          }
+        });
+      }  
+    })
+    .catch((err) => {
+      next(err);
+    });
 }
 
 //Render the static signup page for new users
