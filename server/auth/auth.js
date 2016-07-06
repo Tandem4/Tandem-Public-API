@@ -32,7 +32,7 @@ module.exports = {
           .save()
           .then((user) => {
             //Add user to request object & call next middleware function
-            req.user = user;
+            req.user = user.attributes;
             next();
           })
           .catch((err) => {
@@ -58,7 +58,7 @@ module.exports = {
           if (user) {
             user.set({ verified: 1 });
             user.save();
-            req.user = user;
+            req.user = user.attributes;
             next();
           } else {
             res.status(403).send('403 Forbidden - Invalid User');
@@ -94,7 +94,7 @@ module.exports = {
               res.status(401).send('Wrong password');
             } else {
               //user found - attach to request & call next so controller can sign token from req.user.id
-              req.user = user;
+              req.user = user.attributes;
               //call next middleware
               next();
             }
@@ -121,7 +121,7 @@ module.exports = {
         user.set(newKeyPair);
         user.save();
         //Update user on request object
-        req.user = user;
+        req.user = user.attributes;
         next();
       })
       .catch((err) => {
@@ -129,7 +129,6 @@ module.exports = {
       });
     }
   },
-
 
   //Decode the token received from the client
   decodeToken: () => {
