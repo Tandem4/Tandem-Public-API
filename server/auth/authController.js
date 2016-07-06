@@ -9,18 +9,21 @@ methods.goToLogin = (req, res, next) => {
 }
 
 //Sign and send token response for valid users
-methods.login = (req, res, next) => {
+methods.dashboard = (req, res, next) => {
   var token = signToken(req.user.id);
   //Send the JWT token back in a custom response header
-  res.set('X-Access-Token', token);
-  //Render the article page for manually submitting an article
-  
+  // res.set('X-Access-Token', token);
+  //Get the user's API key & secret to display on the page
   User.forge({ id: req.user.id })
     .fetch()
     .then((user) => {
       if (!user) {
         res.status(403).send('Forbidden - user not found')
       } else {
+        console.log(token);
+        res.set({
+          'Set-Cookie': 'access_token=' + token
+        });
         res.render('admin', {
           api: {
             key: user.attributes.api_key,
@@ -33,6 +36,35 @@ methods.login = (req, res, next) => {
       next(err);
     });
 }
+
+// //Sign and send token response for valid users
+// methods.newKey = (req, res, next) => {
+//   var token = signToken(req.user.id);
+//   //Send the JWT token back in a custom response header
+//   res.set('X-Access-Token', token);
+//   //Get the user's API key & secret to display on the page
+//   User.forge({ id: req.user.id })
+//   {
+//     api_key: uuid.v4().split('-').join(''),
+//     api_secret: uuid.v4().split('-').join('') //uuid
+//   }
+//     .fetch()
+//     .then((user) => {
+//       if (!user) {
+//         res.status(403).send('Forbidden - user not found')
+//       } else {
+//         res.render('admin', {
+//           api: {
+//             key: user.attributes.api_key,
+//             secret: user.attributes.api_secret
+//           }
+//         });
+//       }  
+//     })
+//     .catch((err) => {
+//       next(err);
+//     });
+// }
 
 //Render the static signup page for new users
 methods.goToSignup = (req, res, next) => {

@@ -81,6 +81,26 @@ module.exports = {
     };
   },
 
+  // newApiKey: () => {
+  //   return (req, res, next) => {       
+  //     //New API key info for user      
+  //     var newKey = {
+  //       api_key: uuid.v4().split('-').join(''),
+  //       api_secret: uuid.v4().split('-').join('') //uuid
+  //     }
+  //     User.forge(newUser)
+  //     .save()
+  //     .then((user) => {
+  //       //Add user to request object & call next middleware
+  //       req.user = user;
+  //       next();
+  //     })
+  //     .catch((err) => {
+  //       next(err);
+  //     });
+  //   }
+  // },
+
   validateMail: () => {
     return (req, res, next) => {
       //Select user from db based on uuid per verify link
@@ -107,6 +127,8 @@ module.exports = {
   //Decode the token received from the client
   decodeToken: () => {
     return (req, res, next) => {
+
+      console.log(req.headers);
       //if token placed in query string, place on the headers so checkToken function can check it.
       if (req.query && req.query.hasOwnProperty('access_token')) {
         req.headers.authorization = 'Bearer ' + req.query.access_token;
