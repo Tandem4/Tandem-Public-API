@@ -20,16 +20,11 @@ methods.signUp = (req, res, next) => {
 //After adding new user to db, prompt them to validate email address
 //TODO - there need to be two ways of accessing this endpoint (i.e. two endpoints - one for web client, one for straight API call)
 methods.verify = (req, res, next) => {
-  var token = signToken(req.user.id);
-  //Send the JWT token back in a custom response header
-  res.set('X-Access-Token', token);
-  //Render the article page for manually submitting an article
-  res.render('article');
+  res.send('<div>Mail successfully validated! Please <a href="/auth/login">login</a> to continue.</div>');
 };
 
 //Sign and send token response for valid users; display api key pair
 methods.dashboard = (req, res, next) => {
-  console.log(req.user);
   //Get the user's API key & secret to display on the page
   User.forge({ id: req.user.id })
     .fetch()
@@ -55,6 +50,14 @@ methods.dashboard = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
+};
+
+//After adding new user to db, prompt them to validate email address
+methods.logOut = (req, res, next) => {
+  res.set({
+    'Set-Cookie': 'access_token=deleted; Path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly'
+  });
+  res.send('<div>Successfully logged out.  Click <a href="/auth/login">here</a> to login again.</div>');
 };
 
 module.exports = methods;
