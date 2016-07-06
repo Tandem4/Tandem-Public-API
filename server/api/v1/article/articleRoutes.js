@@ -7,10 +7,12 @@ var decodeToken = require('../../../auth/auth').decodeToken;
 *************************************************/
 
 /*---------------------------------------------------------------------------------------------
- * Not neccessary in this implentation, but retained in the repo as is a useful pattern:
+ * Not neccessary in this implementation, but retained in the repo as is a useful pattern:
  * -> Local route param callback to set route specific params on request object for easy access
+ * (see articleController.params)
+-----------------------------------------------------------------------------------------------
+  router.param('id', articleController.params);
 ----------------------------------------------------------------------------------------------*/
-// router.param('id', articleController.params);
 
 //NO AUTH
 router.route('/')

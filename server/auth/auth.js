@@ -10,6 +10,7 @@ var mail = require('../utils/mail');
 var Promise = require('bluebird');
 
 module.exports = {
+  //Hashes email & password & adds a new (unverified) user to the Users table; sends verification email to new user
   addNewUser: () => {
     return (req, res, next) => {       
       //New user object for database; verified set to false            
@@ -20,9 +21,9 @@ module.exports = {
         api_key: uuid.v4().split('-').join(''),
         api_secret: uuid.v4().split('-').join('') //uuid
       }
-      //Email verification link
+      //Build email verification link
       var verifyLink = req.protocol + '://' + req.headers.host + '/auth/verify?id=' + newUser.api_key;
-      //Standard email message format
+      //Set standard email message format
       var messageOptions = mail.createMessage(newUser.email_address, verifyLink);
       //Send verfication email
       mail.send(messageOptions)
@@ -30,7 +31,7 @@ module.exports = {
           User.forge(newUser)
           .save()
           .then((user) => {
-            //Add user to request object & call next middleware
+            //Add user to request object & call next middleware function
             req.user = user;
             next();
           })
@@ -46,7 +47,7 @@ module.exports = {
     }
   },
 
-  //Verify user on login
+  //Basic authentication of existing users using the Web Portal - compares login details to hashed details in Users table
   verifyExistingUser: () => {
     return (req, res, next) => {
       //Get the sign in details from the request body
@@ -59,8 +60,7 @@ module.exports = {
         return;
       }
 
-      //TODO: THIS IS UGLY AND NEEDS REFACTORTING OF USER METHODS INTO USER CONTROLLER
-      //Check user vs database
+      //Check user details aginst users Table
       User.forge({ email_address: email })
         .fetch()
         .then((user) => {
@@ -103,6 +103,7 @@ module.exports = {
   //   }
   // },
 
+  //Validates email address based on link sent during signup & changes user status to 'verified' in Users table
   validateMail: () => {
     return (req, res, next) => {
       //Select user from db based on uuid per verify link
@@ -116,7 +117,6 @@ module.exports = {
             req.user = user;
             next();
           } else {
-            //TODO: 403 redirect?
             res.status(403).send('403 Forbidden - Invalid User');
           }
         })
@@ -129,11 +129,9 @@ module.exports = {
   //Decode the token received from the client
   decodeToken: () => {
     return (req, res, next) => {
-
       //Parse the token from the cookie header on the request & add it to the Auth header for purposes of the Jwt checkToken function
       var accessToken = req.headers.cookie.substring(13) || '';
       req.headers.authorization = 'Bearer ' + accessToken;
-
       // If valid token, attaches decoded token to req.user & calls next(); else calls next() with an error
       checkToken(req, res, next);
     }
