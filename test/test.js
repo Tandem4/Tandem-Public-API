@@ -4,8 +4,8 @@ var expect = require('chai').expect;
 var supertest = require('supertest');
 var server = require('../index.js');
 var request = supertest.agent(server);
-var trendController = require('../server/api/v1/trends/trendController');
-var articleController = require('../server/api/v1/articles/articleController');
+var trendController = require('../server/api/v1/trend/trendController');
+var articleController = require('../server/api/v1/article/articleController');
 
 describe('get all trends', function() {
   it('should be a function', function() {
