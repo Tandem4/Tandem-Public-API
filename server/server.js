@@ -8,13 +8,9 @@ var api = require('./api/v1/api');
 app.engine('pug', pug);
 app.set('view engine', 'pug');
 app.set('views', __dirname + '/views');
-// app.use(express.static('public'));
 
 //Set up app middleware
 require('./middleware/appMiddleware')(app);
-
-// //All API endpoints subject to throttling
-// app.all('/api/v1/*', [require('./middleware/throttle')]);
 
 //Set up the auth & api routes
 app.use('/api/v1', api);
@@ -22,7 +18,6 @@ app.use('/auth', auth);
 
 //Set up wildcard default redirect for unhandled routes
 app.get('/', (req, res) => {
-  console.log("THE WILDCARD REDIRECT HIT");
   res.redirect('/api/v1/trends');
 })
 
@@ -30,7 +25,7 @@ app.get('/', (req, res) => {
 app.use((err, req, res, next) => {
   //Unhandled authorization error
   if (err.name === 'UnauthorizedError') {
-    res.status(401).send('Invalid token') //href to login?
+    res.status(401).send('<div>Invalid token - please login <a href="/auth/login">here</a></div>');
     return;
   }
   //Unhandled server error

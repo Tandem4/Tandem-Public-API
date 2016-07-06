@@ -2,33 +2,42 @@ var Article = require('tandem-db').Article;
 var db = require('tandem-db').db;
 var RawArticle = require('../../../config/mongoConfig');
 var uuid = require('node-uuid');
+var signToken = require('../../../auth/auth').signToken;
+
+/***********************************************************
+* PURPOSE: Controller methods for 'articles' API endpoints
+***********************************************************/
+
 var methods = {};
 
 /*---------------------------------------------------------------------------------------------
  * Not neccessary in this implentation, but retained in the repo as is a useful pattern:
  * -> Local route param callback to set route specific params on request object for easy access
  * see 'articleRoutes.js', called by 'router.param' method
+-----------------------------------------------------------------------------------------------
+  methods.params = (req, res, next, id) => {
+    Article.forge({ id: id })
+      .fetch()
+      .then((article) => {
+        if (!article) {
+          next(new Error('Article not found'));
+        } else {
+          req.article = article.attributes.id;
+          console.log(req.article);
+          next();
+        }
+      })
+      .catch((err) => {
+        next(err);
+      })
+  };
 ----------------------------------------------------------------------------------------------*/
-methods.params = (req, res, next, id) => {
-  Article.forge({ id: id })
-    .fetch()
-    .then((article) => {
-      if (!article) {
-        next(new Error('Article not found'));
-      } else {
-        req.article = article.attributes.id;
-        console.log(req.article);
-        next();
-      }
-    })
-    .catch((err) => {
-      next(err);
-    })
-};
 
 //GET method returning all articles for the selected trend, showing publication name & sorted by date in descending order
+//NO AUTH
 methods.getArticles = (req, res, next) => {
   var trendId = req.query.id;
+  //Use knex QueryBuilder to return required fields constrained by the trend id & join table relationships between trends & article
   Article.query()
     .innerJoin('processed_articles_trends', 'processed_articles.id', 'processed_articles_trends.processed_article_id')
     .innerJoin('publications', 'processed_articles.pub_id', 'publications.id')
@@ -50,6 +59,7 @@ methods.getArticles = (req, res, next) => {
 };
 
 //GET method returning one article
+//NO AUTH
 methods.getOne = (req, res, next) => {
   Article.forge({ id: req.article })
     .fetch()
@@ -68,13 +78,34 @@ methods.getOne = (req, res, next) => {
     })
 };
 
-//TODO: REFACTOR INTO SEPARATE ROUTE ENDPOINT WITH SEPARATE CONTROLLER - DOESNT BELONG HERE
+//Renders the template for manually posting articles to be included in Tandem
+//NO AUTH
+methods.uploadTemplate = (req, res, next) => {
+  //Generate the signed token
+  var token = signToken(req.user.id);
+  //Set cookie; use 'HttpOnly' flag - only server may attempt to access cookie, not client (mitigate XSS attacks); A
+  res.set({
+    'Set-Cookie': 'access_token=' + token + '; Path=/; HttpOnly',
+    'Access-Control-Allow-Credentials': true
+  });
+  res.render('article');
+};
+
+
 //POST method for manually adding an article to the database
+//BEARER AUTH
 methods.post = (req, res, next) => {
   //Get the upload object from req.body & add a unique upload key
-  var rawArticle = Object.assign({}, req.body, { uploadid: uuid.v1().split('-').join('') });
+  var rawArticle = Object.assign({}, req.body, { uploadId: uuid.v1().split('-').join('') });
   //Insert the article into MongoDb
   RawArticle(rawArticle);
+  //Generate the signed token
+  var token = signToken(req.user.id);
+  //Set cookie; use 'HttpOnly' flag - only server may attempt to access cookie, not client (mitigate XSS attacks); A
+  res.set({
+    'Set-Cookie': 'access_token=' + token + '; Path=/; HttpOnly',
+    'Access-Control-Allow-Credentials': true
+  });
   res.json(rawArticle)
   next();
 };

@@ -1,3 +1,5 @@
+var decodeToken = require('./auth').decodeToken;
+var newApiKey = require('./auth').newApiKey;
 var router = require('express').Router();
 var throttle = require('../middleware/apiRateLimiter');
 var authController = require('./authController');
@@ -5,30 +7,39 @@ var verifyExistingUser = require('./auth').verifyExistingUser;
 var addNewUser = require('./auth').addNewUser;
 var validateMail = require('./auth').validateMail;
 
-/*********************************************
-* NOTE: All routes relative to '/auth'
-*********************************************/
+/*****************************************************************
+* PURPOSE: Define AUTH routes - all endpoints relative to /auth
+*****************************************************************/
 
-//API rate limiting middleware function
+//ALL ROUTES (/auth)- API rate limiting middleware function
 router.use(throttle());
 
-//Render login page
+//NO AUTH - render login page
 router.get('/login', (req, res) => {
+  res.set({
+    'Set-Cookie': 'access_token=deleted; Path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+  });
   res.render('login');
 });
 
-//Verify is existing user & log them in - return signed JWT token
-router.post('/login', verifyExistingUser(), authController.login);
-
-//Render new sign up page
+//NO AUTH - render new sign up page
 router.get('/signup', (req, res) => {
   res.render('signup');
 });
 
-//Process initial signup details & send verification email
+//NO AUTH - process initial signup details & send verification email
 router.post('/signup', addNewUser(), authController.signUp);
 
-//Update user info based on email verification & return signed JWT token
+//NO AUTH - update user info based on email verification
 router.get('/verify', validateMail(), authController.verify);
+
+//BASIC AUTH - verify is existing user & log them in - return signed JWT token - check login details & return token in authController
+router.post('/dashboard', verifyExistingUser(), authController.dashboard);
+
+//BEARER AUTH - check user already signed in & valid, generate new Api key pair & re-render
+router.post('/newkey', decodeToken(), newApiKey(), authController.dashboard);
+
+//BEARER AUTH - log user out
+router.post('/logout', decodeToken(), authController.logOut);
 
 module.exports = router;

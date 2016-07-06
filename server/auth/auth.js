@@ -1,26 +1,33 @@
 var jwt = require('jsonwebtoken');
 var expressJwt = require('express-jwt');
 var config = require('../config/config');
-var checkToken = expressJwt({ secret: config.secrets.jwt } );
+var jwtSecret = config.secrets.jwt;
+var jwtExpiry = config.expireTime;
+var checkToken = expressJwt({ secret: jwtSecret } );
 var uuid = require('node-uuid');
 var User = require('tandem-db').User;
 var mail = require('../utils/mail');
 var Promise = require('bluebird');
 
+/******************************************************************************
+ * PURPOSE: Module contains various Auth middleware and related helper methods
+ *****************************************************************************/
+
 module.exports = {
+  //Hashes email & password & adds a new (unverified) user to the Users table; sends verification email to new user
   addNewUser: () => {
     return (req, res, next) => {       
       //New user object for database; verified set to false            
       var newUser = {
         email_address: req.body.email,
-        link_uuid: uuid.v1(),
+        link_uuid: req.body.password,
         verified: false,
-        api_key: req.body.password,
+        api_key: uuid.v4().split('-').join(''),
         api_secret: uuid.v4().split('-').join('') //uuid
       }
-      //Email verification link
-      var verifyLink = req.protocol + '://' + req.headers.host + '/auth/verify?id=' + newUser.link_uuid;
-      //Standard email message format
+      //Build email verification link
+      var verifyLink = req.protocol + '://' + req.headers.host + '/auth/verify?id=' + newUser.api_key;
+      //Set standard email message format
       var messageOptions = mail.createMessage(newUser.email_address, verifyLink);
       //Send verfication email
       mail.send(messageOptions)
@@ -28,8 +35,8 @@ module.exports = {
           User.forge(newUser)
           .save()
           .then((user) => {
-            //Add user to request object & call next middleware
-            req.user = user;
+            //Add user to request object & call next middleware function
+            req.user = user.attributes;
             next();
           })
           .catch((err) => {
@@ -44,7 +51,30 @@ module.exports = {
     }
   },
 
-  //Verify user on login
+  //Validates email address based on link sent during signup & changes user status to 'verified' in Users table
+  validateMail: () => {
+    return (req, res, next) => {
+      //Select user from db based on uuid per verify link
+      User.forge({ 'api_key': req.query.id })
+        .fetch()
+        .then((user) => {
+          //If exists, set verified to true, save & redirect to admin console
+          if (user) {
+            user.set({ verified: 1 });
+            user.save();
+            req.user = user.attributes;
+            next();
+          } else {
+            res.status(403).send('403 Forbidden - Invalid User');
+          }
+        })
+        .catch((err) => {
+          next(err);
+        });
+    }
+  },
+
+  //Basic authentication of existing users using the Web Portal - compares login details to hashed details in Users table
   verifyExistingUser: () => {
     return (req, res, next) => {
       //Get the sign in details from the request body
@@ -57,8 +87,7 @@ module.exports = {
         return;
       }
 
-      //TODO: THIS IS UGLY AND NEEDS REFACTORTING OF USER METHODS INTO USER CONTROLLER
-      //Check user vs database
+      //Check user details aginst users Table
       User.forge({ email_address: email })
         .fetch()
         .then((user) => {
@@ -69,7 +98,7 @@ module.exports = {
               res.status(401).send('Wrong password');
             } else {
               //user found - attach to request & call next so controller can sign token from req.user.id
-              req.user = user;
+              req.user = user.attributes;
               //call next middleware
               next();
             }
@@ -81,46 +110,48 @@ module.exports = {
     };
   },
 
-  validateMail: () => {
-    return (req, res, next) => {
-      //Select user from db based on uuid per verify link
-      User.forge({ 'link_uuid': req.query.id })
-        .fetch()
-        .then((user) => {
-          //If exists, set verified to true, save & redirect to admin console
-          if (user) {
-            user.set({ verified: 1 });
-            user.save();
-            req.user = user;
-            next();
-          } else {
-            //TODO: 403 redirect?
-            res.status(403).send('403 Forbidden - Invalid User');
-          }
-        })
-        .catch((err) => {
-          next(err);
-        });
+  newApiKey: () => {
+    return (req, res, next) => {       
+      //New API key info for user      
+      var newKeyPair = {
+        api_key: uuid.v4().split('-').join(''),
+        api_secret: uuid.v4().split('-').join('') //uuid
+      };
+      //Get current user
+      User.forge({ id: req.user.id })
+      .fetch()
+      .then((user) => {
+        //Update keyPair with new values & save
+        user.set(newKeyPair);
+        user.save();
+        //Update user on request object
+        req.user = user.attributes;
+        next();
+      })
+      .catch((err) => {
+        next(err);
+      });
     }
   },
 
   //Decode the token received from the client
   decodeToken: () => {
     return (req, res, next) => {
-      //if token placed in query string, place on the headers so checkToken function can check it.
-      if (req.query && req.query.hasOwnProperty('access_token')) {
-        req.headers.authorization = 'Bearer ' + req.query.access_token;
+      //Parse the token from the cookie header on the request & add it to the Auth header for purposes of the Jwt checkToken function
+      if (req.headers.cookie) {
+        var accessToken = req.headers.cookie.substring(13);   
       }
-      // Calls next() if valid token & attaches decoded token to req.user; else calls next() with an error
+      req.headers.authorization = 'Bearer ' + accessToken;
+      // If valid token, attaches decoded token to req.user & calls next(); else calls next() with an error
       checkToken(req, res, next);
     }
   },
 
-  //Sign the token
+  //Sign the token with user id, secret & expiry time
   signToken: (id) => {
     return jwt.sign(
-      {id: id},
-      config.secrets.jwt,
-      {expiresIn: config.expireTime})
+      { id: id },
+      jwtSecret,
+      { expiresIn: jwtExpiry })
   }
 };

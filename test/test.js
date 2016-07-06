@@ -5,6 +5,7 @@ var supertest = require('supertest');
 var server = require('../index.js');
 var request = supertest.agent(server);
 var trendController = require('../server/api/v1/trend/trendController');
+var articleController = require('../server/api/v1/article/articleController');
 
 describe('get all trends', function() {
   it('should be a function', function() {
@@ -12,9 +13,9 @@ describe('get all trends', function() {
   });
 });
 
-describe('get articles', function() {
+describe('get all articles', function() {
   it('should be a function', function() {
-    expect(trendController.getOne).to.be.a('function');
+    expect(articleController.getArticles).to.be.a('function');
   });
 });
 
