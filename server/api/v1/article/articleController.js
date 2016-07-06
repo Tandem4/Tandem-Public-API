@@ -1,4 +1,5 @@
 var Article = require('tandem-db').Article;
+var db = require('tandem-db').db;
 var RawArticle = require('../../../config/mongoConfig');
 var uuid = require('node-uuid');
 var methods = {};
@@ -29,10 +30,11 @@ methods.params = (req, res, next, id) => {
 methods.getArticles = (req, res, next) => {
   var trendId = req.query.id;
   Article.query()
-    .select(['*', 'publications.pub_name'])
     .innerJoin('processed_articles_trends', 'processed_articles.id', 'processed_articles_trends.processed_article_id')
     .innerJoin('publications', 'processed_articles.pub_id', 'publications.id')
-    .where('processed_articles_trends.trend_id', '=', req.query.id)
+    .where('processed_articles_trends.trend_id', '=', trendId)
+    .select(db.knex.raw('processed_articles.*'))
+    .select('publications.pub_name')
     .orderBy('article_date', 'DESC')
     .then((articles) => {
       if (!articles) {
