@@ -4,6 +4,10 @@ var RawArticle = require('../../../config/mongoConfig');
 var uuid = require('node-uuid');
 var signToken = require('../../../auth/auth').signToken;
 
+/***********************************************************
+* PURPOSE: Controller methods for 'articles' API endpoints
+***********************************************************/
+
 var methods = {};
 
 /*---------------------------------------------------------------------------------------------

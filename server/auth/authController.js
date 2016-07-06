@@ -1,6 +1,10 @@
 var signToken = require('./auth').signToken;
 var User = require('tandem-db').User;
 
+/***********************************************************
+* PURPOSE: Controller methods for all 'auth' endpoints
+***********************************************************/
+
 var methods = {};
 
 //Render the static signup page for new users
