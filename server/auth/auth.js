@@ -95,7 +95,6 @@ module.exports = {
             } else {
               //user found - attach to request & call next so controller can sign token from req.user.id
               req.user = user;
-              console.log('VERIFYEXISTINGUSER', req.user.id);
               //call next middleware
               next();
             }
@@ -115,7 +114,6 @@ module.exports = {
         api_secret: uuid.v4().split('-').join('') //uuid
       };
       //Get current user
-      console.log('NEWAPIKEY', req.user.id);
       User.forge({ id: req.user.id })
       .fetch()
       .then((user) => {
@@ -124,7 +122,6 @@ module.exports = {
         user.save();
         //Update user on request object
         req.user = user;
-        console.log(req.user);
         next();
       })
       .catch((err) => {
