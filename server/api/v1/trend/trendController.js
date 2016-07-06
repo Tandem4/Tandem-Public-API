@@ -1,5 +1,9 @@
 var Trend = require('tandem-db').Trend;
-var Article = require('tandem-db').Article;
+
+/***********************************************************
+* PURPOSE: Controller methods for 'trends' API endpoints
+***********************************************************/
+
 var methods = {};
 
 //NO AUTH - Get all trends sorted by rank in descending order

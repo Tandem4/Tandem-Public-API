@@ -9,6 +9,10 @@ var User = require('tandem-db').User;
 var mail = require('../utils/mail');
 var Promise = require('bluebird');
 
+/******************************************************************************
+ * PURPOSE: Module contains various Auth middleware and related helper methods
+ *****************************************************************************/
+
 module.exports = {
   //Hashes email & password & adds a new (unverified) user to the Users table; sends verification email to new user
   addNewUser: () => {

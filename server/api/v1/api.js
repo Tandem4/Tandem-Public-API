@@ -1,9 +1,9 @@
 var router = require('express').Router();
 var throttle = require('../../middleware/apiRateLimiter');
 
-/*********************************************
-* Routes relative to /api/v1/
-*********************************************/
+/***********************************************************************************
+* PURPOSE: Mount major API routes as middleware - all endpoints relative to /api/v1
+***********************************************************************************/
 
 //ALL ROUTES (/api/v1) - API rate limiting middleware function
 router.use(throttle());

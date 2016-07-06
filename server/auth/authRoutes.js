@@ -7,9 +7,9 @@ var verifyExistingUser = require('./auth').verifyExistingUser;
 var addNewUser = require('./auth').addNewUser;
 var validateMail = require('./auth').validateMail;
 
-/*********************************************
-* NOTE: All routes relative to '/auth'
-*********************************************/
+/*****************************************************************
+* PURPOSE: Define AUTH routes - all endpoints relative to /auth
+*****************************************************************/
 
 //ALL ROUTES (/auth)- API rate limiting middleware function
 router.use(throttle());

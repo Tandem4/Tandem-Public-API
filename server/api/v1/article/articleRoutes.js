@@ -2,9 +2,9 @@ var router = require('express').Router();
 var articleController = require('./articleController');
 var decodeToken = require('../../../auth/auth').decodeToken;
 
-/*************************************************
-* NOTE: All routes relative to '/api/v1/articles'
-*************************************************/
+/***********************************************************************************
+* PURPOSE: Define API 'article' routes - all endpoints relative to /api/v1/articles
+***********************************************************************************/
 
 /*---------------------------------------------------------------------------------------------
  * Not neccessary in this implementation, but retained in the repo as is a useful pattern:
