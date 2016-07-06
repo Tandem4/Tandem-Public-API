@@ -47,6 +47,29 @@ module.exports = {
     }
   },
 
+  //Validates email address based on link sent during signup & changes user status to 'verified' in Users table
+  validateMail: () => {
+    return (req, res, next) => {
+      //Select user from db based on uuid per verify link
+      User.forge({ 'api_key': req.query.id })
+        .fetch()
+        .then((user) => {
+          //If exists, set verified to true, save & redirect to admin console
+          if (user) {
+            user.set({ verified: 1 });
+            user.save();
+            req.user = user;
+            next();
+          } else {
+            res.status(403).send('403 Forbidden - Invalid User');
+          }
+        })
+        .catch((err) => {
+          next(err);
+        });
+    }
+  },
+
   //Basic authentication of existing users using the Web Portal - compares login details to hashed details in Users table
   verifyExistingUser: () => {
     return (req, res, next) => {
@@ -72,6 +95,7 @@ module.exports = {
             } else {
               //user found - attach to request & call next so controller can sign token from req.user.id
               req.user = user;
+              console.log('VERIFYEXISTINGUSER', req.user.id);
               //call next middleware
               next();
             }
@@ -83,48 +107,32 @@ module.exports = {
     };
   },
 
-  // newApiKey: () => {
-  //   return (req, res, next) => {       
-  //     //New API key info for user      
-  //     var newKey = {
-  //       api_key: uuid.v4().split('-').join(''),
-  //       api_secret: uuid.v4().split('-').join('') //uuid
-  //     }
-  //     User.forge(newUser)
-  //     .save()
-  //     .then((user) => {
-  //       //Add user to request object & call next middleware
-  //       req.user = user;
-  //       next();
-  //     })
-  //     .catch((err) => {
-  //       next(err);
-  //     });
-  //   }
-  // },
-
-  //Validates email address based on link sent during signup & changes user status to 'verified' in Users table
-  validateMail: () => {
-    return (req, res, next) => {
-      //Select user from db based on uuid per verify link
-      User.forge({ 'api_key': req.query.id })
-        .fetch()
-        .then((user) => {
-          //If exists, set verified to true, save & redirect to admin console
-          if (user) {
-            user.set({ verified: 1 });
-            user.save();
-            req.user = user;
-            next();
-          } else {
-            res.status(403).send('403 Forbidden - Invalid User');
-          }
-        })
-        .catch((err) => {
-          next(err);
-        });
+  newApiKey: () => {
+    return (req, res, next) => {       
+      //New API key info for user      
+      var newKeyPair = {
+        api_key: uuid.v4().split('-').join(''),
+        api_secret: uuid.v4().split('-').join('') //uuid
+      };
+      //Get current user
+      console.log('NEWAPIKEY', req.user.id);
+      User.forge({ id: req.user.id })
+      .fetch()
+      .then((user) => {
+        //Update keyPair with new values & save
+        user.set(newKeyPair);
+        user.save();
+        //Update user on request object
+        req.user = user;
+        console.log(req.user);
+        next();
+      })
+      .catch((err) => {
+        next(err);
+      });
     }
   },
+
 
   //Decode the token received from the client
   decodeToken: () => {
