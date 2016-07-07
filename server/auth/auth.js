@@ -134,14 +134,53 @@ module.exports = {
     }
   },
 
+  checkApiKeySecret: () => {
+    return (req, res, next) => {
+      if (req.headers.authorization) {
+        //Initisl authorization header format from client should be 'Basic: base64EncodedCredentialsString'
+        //where base64EncodedCredentialsString = new Buffer('api_key:api_secret').toString('base64') - encoded as such by client
+        var encoded = req.headers.authorization.split(' ')[1];
+        var decoded = this.decodeBase64(encoded);
+        //Decoded string has format 'api_key:api_secret'
+        var apiKeySecret = {
+          api_key: decoded.split(':')[0],
+          api_secret: decoded.split(':')[1]
+        };
+
+        //Get current user based on credentials
+        User.forge(apiKeySecret)
+        .fetch()
+        .then((user) => {
+          //If exists, update request object with user details
+          if (user) {
+            req.user = user.attributes;
+            next();
+          } else {
+            res.status(403).send('403 Forbidden - Invalid User');
+          }
+        })
+        .catch((err) => {
+          next(err);
+        })
+      }
+    }
+  },
+
+  decodeBase64: (encoded) => {
+    //Convert a base64 encoded string to utf8
+    return new Buffer(encoded, 'base64').toString('utf8');
+  }
+
   //Decode the token received from the client
   decodeToken: () => {
     return (req, res, next) => {
-      //Parse the token from the cookie header on the request & add it to the Auth header for purposes of the Jwt checkToken function
+      //Programatic API calls should contain Authorization headers of the form "Bearer: accessToken"
+      //For Web Client calls to API, parse the token from the cookie header on the request & add it to the Auth header for purposes of the Jwt checkToken function
       if (req.headers.cookie) {
         var accessToken = req.headers.cookie.substring(13);   
+        req.headers.authorization = 'Bearer: ' + accessToken;
       }
-      req.headers.authorization = 'Bearer ' + accessToken;
+
       // If valid token, attaches decoded token to req.user & calls next(); else calls next() with an error
       checkToken(req, res, next);
     }

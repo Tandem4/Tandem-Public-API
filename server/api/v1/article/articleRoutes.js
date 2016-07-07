@@ -1,5 +1,6 @@
 var router = require('express').Router();
 var articleController = require('./articleController');
+var checkApiKeySecret = require('../../../auth/auth').checkApiKeySecret;
 var decodeToken = require('../../../auth/auth').decodeToken;
 
 /***********************************************************************************
@@ -23,6 +24,7 @@ router.route('/:id')
   .get(articleController.getOne)
 
 //BEARER AUTH - check user signed in & valid
+router.post('/auth', checkApiKeySecret(), articleController.generateToken); //Generate token for users accessing service programmatically
 router.post('/restricted', decodeToken(), articleController.uploadTemplate); //Go to the manual article upload template
 router.post('/restricted/add', decodeToken(), articleController.post); //add a story
 
