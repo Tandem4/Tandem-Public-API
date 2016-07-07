@@ -1,25 +1,29 @@
 var router = require('express').Router();
 var articleController = require('./articleController');
-var verifyUser = require('../../../auth/auth').verifyUser;
+var decodeToken = require('../../../auth/auth').decodeToken;
 
-/*************************************************
-* NOTE: All routes relative to '/api/v1/articles'
-*************************************************/
+/***********************************************************************************
+* PURPOSE: Define API 'article' routes - all endpoints relative to /api/v1/articles
+***********************************************************************************/
 
 /*---------------------------------------------------------------------------------------------
- * Not neccessary in this implentation, but retained in the repo as is a useful pattern:
+ * Not neccessary in this implementation, but retained in the repo as is a useful pattern:
  * -> Local route param callback to set route specific params on request object for easy access
+ * -> (see articleController.params)
+-----------------------------------------------------------------------------------------------
+ // router.param('id', articleController.params);
 ----------------------------------------------------------------------------------------------*/
-router.param('id', articleController.params);
 
+//NO AUTH
 router.route('/')
-  .get(articleController.getArticles)
-
-// router.post('/', verifyUser(), articleController.post); //add a story
-router.post('/', articleController.post); //add a story
-
+  .get(articleController.getArticles) //Get articles for the selected trend
+  
+//NO AUTH
 router.route('/:id')
   .get(articleController.getOne)
-  // .delete(articleController.delete);
+
+//BEARER AUTH - check user signed in & valid
+router.post('/restricted', decodeToken(), articleController.uploadTemplate); //Go to the manual article upload template
+router.post('/restricted/add', decodeToken(), articleController.post); //add a story
 
 module.exports = router;

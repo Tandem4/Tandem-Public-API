@@ -4,9 +4,25 @@ block styles
 
 block content
   div.api-container
-    h1.title Tandem API Gateway - Admin Console
+    h1.title Welcome to the Tandem API Gateway
     div.api-key
+      div 
+      strong API Key: 
+      div #{api.key}
 
     div.api-secret
+      div 
+      strong API Secret: 
+      div #{api.secret}
 
-    div.ap
+    div.form-apikey
+      form(method='POST', action='/auth/newkey')
+        button.login-button Generate New API Key / Secret
+
+    div.form-article
+      form(method='POST', action='/api/v1/articles/restricted')
+        button.login-button Generate Submit An Article
+
+    div.form-logout
+          form(method='POST', action='/auth/logout')
+            button.login-button LOGOUT

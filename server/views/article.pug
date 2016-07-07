@@ -6,7 +6,7 @@ block content
   div.article-container
     h1.title Tandem API Gateway - Add Article
     div.article-form
-      form(method='POST', action='/api/v1/articles')
+      form(method='POST', action='/api/v1/articles/restricted/add')
         div.article-form-input.pub_name
           input(type='text', name='pub_name', placeholder="Publication name" required)
         div.article-form-input.pub_url
