@@ -40,7 +40,7 @@ var rateLimiter = () => {
       //Handle errors
       if (error) {
         console.log(error);
-        next(err);        
+        next(error);        
       //No previous requests; generate List & process API request
       } else if (!replies) {
         //Batch execute atomic commands

@@ -48,7 +48,7 @@ methods.getArticles = (req, res, next) => {
       if (!articles) {
         next(new Error('No articles found'));
       } else {
-        res.json(articles);
+        res.status(200).json(articles);
       }
     })
     //Catch unanticipated errors
@@ -76,16 +76,16 @@ methods.getOne = (req, res, next) => {
     })
 };
 
-// //NO AUTH - method returning one article
-// methods.generateToken = (req, res, next) => {
-//   //Sign token
-//   var token = signToken(req.user.id);
-//   //Set authorization header
-//   res.set({
-//     'Authorization': 'Bearer: ' + token
-//   });
-//   res.json('User Authenticated')
-// };
+//NO AUTH - method returning one article
+methods.generateToken = (req, res, next) => {
+  //Sign token
+  var token = signToken(req.user.id);
+  //Set authorization header
+  res.set({
+    'Authorization': 'Bearer: ' + token
+  });
+  res.status(200).json('User Authenticated')
+};
 
 //AUTH - renders the template for manually posting articles to be included in Tandem
 methods.uploadTemplate = (req, res, next) => {
@@ -112,7 +112,7 @@ methods.post = (req, res, next) => {
     'Set-Cookie': 'access_token=' + token + '; Path=/; HttpOnly',
     'Access-Control-Allow-Credentials': true
   });
-  res.json(rawArticle)
+  res.status(200).json(rawArticle)
   next();
 };
 
