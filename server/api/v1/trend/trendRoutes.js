@@ -9,4 +9,9 @@ var trendController = require('./trendController');
 router.route('/')
   .get(trendController.get);
 
+//Catch all path for invalid routes
+router.get('*', (req, res) => {
+  res.status(404).send('Page not found');
+})
+
 module.exports = router;
