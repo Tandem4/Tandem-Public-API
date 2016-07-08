@@ -22,13 +22,9 @@ router.route('/')
 //BEARER AUTH - check user signed in & valid
 router.post('/restricted', decodeToken(), articleController.uploadTemplate); //Go to the manual article upload template
 router.post('/restricted/add', decodeToken(), articleController.post); //add a story
-// router.post('/auth', checkApiKeySecret(), articleController.generateToken); //Generate token for users accessing service programmatically
-// router.get('/*', (req, res, next) => {
-//   res.redirect('/api/v1/trends');
-//   next();
-// }); //Generate token for users accessing service programmatically
 
-// router.get('/auth', decodeToken(), articleController.getToken); //add a story
+//Generate token for users accessing service programmatically
+router.get('/auth', checkApiKeySecret(), articleController.generateToken); //add a story
 
 //Catch all path for invalid routes
 router.get('*', (req, res) => {

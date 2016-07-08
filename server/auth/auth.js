@@ -136,11 +136,12 @@ module.exports = {
 
   checkApiKeySecret: () => {
     return (req, res, next) => {
+      console.log(req.headers);
       if (req.headers.authorization) {
         //Initisl authorization header format from client should be 'Basic: base64EncodedCredentialsString'
         //where base64EncodedCredentialsString = new Buffer('api_key:api_secret').toString('base64') - encoded as such by client
         var encoded = req.headers.authorization.split(' ')[1];
-        var decoded = this.decodeBase64(encoded);
+        var decoded = decodeBase64(encoded);
         //Decoded string has format 'api_key:api_secret'
         var apiKeySecret = {
           api_key: decoded.split(':')[0],
@@ -166,11 +167,6 @@ module.exports = {
     }
   },
 
-  decodeBase64: (encoded) => {
-    //Convert a base64 encoded string to utf8
-    return new Buffer(encoded, 'base64').toString('utf8');
-  },
-
   //Decode the token received from the client
   decodeToken: () => {
     return (req, res, next) => {
@@ -193,4 +189,9 @@ module.exports = {
       jwtSecret,
       { expiresIn: jwtExpiry })
   }
+};
+
+decodeBase64 = (encoded) => {
+  //Convert a base64 encoded string to utf8
+  return new Buffer(encoded, 'base64').toString('utf8');
 };
