@@ -7,8 +7,8 @@
 ********************************************************************************/
 module.exports = {
   NODE_MAILER: {
-    SERVICE: 'Gmail',
-    USER: 'tandem4news@gmail.com',
-    PASS: 'AsifBrettKaniNicole!'
+    SERVICE: process.env.TANDEM_NODE_MAILER_SERVICE,
+    USER: process.env.TANDEM_NODE_MAILER_USER,
+    PASS: process.env.TANDEM_NODE_MAILER_PASS
   }
 };
