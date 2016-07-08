@@ -169,7 +169,7 @@ module.exports = {
   decodeBase64: (encoded) => {
     //Convert a base64 encoded string to utf8
     return new Buffer(encoded, 'base64').toString('utf8');
-  }
+  },
 
   //Decode the token received from the client
   decodeToken: () => {
