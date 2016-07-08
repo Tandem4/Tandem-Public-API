@@ -54,10 +54,6 @@
 
   ```
 
-## Screenshots
-
-  ![Site Architecture](https://cloud.githubusercontent.com/assets/10008938/15844915/2478c052-2c23-11e6-8069-5ed2edce3c05.png)
-
 ## Site Architecture
 
   ![Site Architecture](https://i.imgsafe.org/e0297453a4.png)
@@ -98,8 +94,7 @@
 │   │   └── mongoConfig.js
 │   ├── middleware
 │   │   ├── apiRateLimiter.js
-│   │   ├── appMiddleware.js
-│   │   └── zz_toRevisitLater_apiRateLimiter.js
+│   │   └── appMiddleware.js
 │   ├── server.js
 │   ├── utils
 │   │   └── mail.js
