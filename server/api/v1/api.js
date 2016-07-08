@@ -11,4 +11,9 @@ router.use(throttle());
 router.use('/trends', require('./trend/trendRoutes'));
 router.use('/articles', require('./article/articleRoutes'));//post requires auth
 
+//Catch all path for invalid routes
+router.get('*', (req, res) => {
+  res.status(404).send('Page not found');
+})
+
 module.exports = router;

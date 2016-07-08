@@ -1,5 +1,6 @@
 var router = require('express').Router();
 var articleController = require('./articleController');
+var checkApiKeySecret = require('../../../auth/auth').checkApiKeySecret;
 var decodeToken = require('../../../auth/auth').decodeToken;
 
 /***********************************************************************************
@@ -17,13 +18,17 @@ var decodeToken = require('../../../auth/auth').decodeToken;
 //NO AUTH
 router.route('/')
   .get(articleController.getArticles) //Get articles for the selected trend
-  
-//NO AUTH
-router.route('/:id')
-  .get(articleController.getOne)
 
 //BEARER AUTH - check user signed in & valid
 router.post('/restricted', decodeToken(), articleController.uploadTemplate); //Go to the manual article upload template
 router.post('/restricted/add', decodeToken(), articleController.post); //add a story
+
+//Generate token for users accessing service programmatically
+router.get('/auth', checkApiKeySecret(), articleController.generateToken); //add a story
+
+//Catch all path for invalid routes
+router.get('*', (req, res) => {
+  res.status(404).send('Page not found');
+});
 
 module.exports = router;
