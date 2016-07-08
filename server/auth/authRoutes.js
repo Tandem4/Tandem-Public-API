@@ -42,4 +42,9 @@ router.post('/newkey', decodeToken(), newApiKey(), authController.dashboard);
 //BEARER AUTH - log user out
 router.post('/logout', decodeToken(), authController.logOut);
 
+//Catch all path for invalid routes
+router.get('*', (req, res) => {
+  res.status(404).send('Page not found');
+})
+
 module.exports = router;

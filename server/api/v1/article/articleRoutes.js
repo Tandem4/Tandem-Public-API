@@ -17,13 +17,16 @@ var decodeToken = require('../../../auth/auth').decodeToken;
 //NO AUTH
 router.route('/')
   .get(articleController.getArticles) //Get articles for the selected trend
-  
-//NO AUTH
-router.route('/:id')
-  .get(articleController.getOne)
 
 //BEARER AUTH - check user signed in & valid
 router.post('/restricted', decodeToken(), articleController.uploadTemplate); //Go to the manual article upload template
 router.post('/restricted/add', decodeToken(), articleController.post); //add a story
+
+// router.get('/auth', decodeToken(), articleController.getToken); //add a story
+
+//Catch all path for invalid routes
+router.get('*', (req, res) => {
+  res.status(404).send('Page not found');
+});
 
 module.exports = router;

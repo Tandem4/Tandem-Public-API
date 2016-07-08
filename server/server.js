@@ -17,7 +17,7 @@ app.use('/api/v1', api);
 app.use('/auth', auth);
 
 //Set up wildcard default redirect for unhandled routes
-app.get('/', (req, res) => {
+app.get('*', (req, res) => {
   res.redirect('/api/v1/trends');
 })
 
