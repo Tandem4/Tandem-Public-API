@@ -60,11 +60,11 @@
   
 ## Sequence Diagram 
  
-   ![Sequence Diagram](https://raw.githubusercontent.com/NCSkoglund/Tandem-Public-API/merge-harmony/images/sequence_diagram.png) 
+   ![Sequence Diagram](https://raw.githubusercontent.com/NCSkoglund/Tandem-Analysis/merge-harmony/images/sequence_diagram.png) 
 
 ## Schema Diagram
 
-  ![Schema Diagram](https://raw.githubusercontent.com/Tandem4/Tandem-Public-API/master/images/DB_schema.png)
+  ![Schema Diagram](https://raw.githubusercontent.com/Tandem4/Tandem-Analysis/master/images/DB_schema.png)
 
 ## Folder Guide
 
